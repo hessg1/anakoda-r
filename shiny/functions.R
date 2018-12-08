@@ -1,3 +1,9 @@
+## just here as a template
+convertTime <- function(input){
+  return(as.POSIXct(input, format="%Y-%m-%dT%H:%M:%S"))
+}
+
+
 ##This function extracts the following data from a dataframe as returned when querying 
 ## observations from midata with RonFHIR
 ## Return-value: dataframe with one observation per row in following order:
@@ -17,9 +23,9 @@ extractData <- function(input){
     name <- resources$subject$display[i]
     startTime <- resources$effectivePeriod$start[i]
     endTime <- resources$effectivePeriod$end[i]
-    timestamp <- resources$meta$lastUpdated[i] # TODO: get correct date format
+    timestamp <- resources$meta$lastUpdated[i] 
     
-    # "real" data
+    # "load" data
     bodysiteSCT <- resources$bodySite$coding[[i]]$code
     bodysiteText <- resources$bodySite$coding[[i]]$display
     # we have to handle the case when bodysite has no value
