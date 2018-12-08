@@ -1,0 +1,101 @@
+##This function extracts the following data from a dataframe as returned when querying 
+## observations from midata with RonFHIR
+## Return-value: dataframe with one observation per row in following order:
+## ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
+## Finding (as plain text), Finding (as SCT), Intensity of the Finding
+##
+##    Author: hessg1@bfh.ch  Date: 2018-12-07
+##
+extractData <- function(input){
+  resources <- input$entry$resource
+  numberOfObservations <- dim(resources)[1]
+  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector() ) 
+  for(i in 1:numberOfObservations){
+    
+    # metadata
+    ID <- resources$id[i]
+    name <- resources$subject$display[i]
+    startTime <- resources$effectivePeriod$start[i]
+    endTime <- resources$effectivePeriod$end[i]
+    timestamp <- resources$meta$lastUpdated[i] # TODO: get correct date format
+    
+    # "real" data
+    bodysiteSCT <- resources$bodySite$coding[[i]]$code
+    bodysiteText <- resources$bodySite$coding[[i]]$display
+    # we have to handle the case when bodysite has no value
+    if(is.null(bodysiteSCT)){
+      bodysiteSCT <- NA
+    }
+    if(is.null(bodysiteText)){
+      bodysiteText <- NA
+    }
+    
+    findingText <- resources$valueCodeableConcept$coding[[i]]$display
+    findingSCT <- resources$valueCodeableConcept$coding[[i]]$code
+    findingIntensity <- resources$extension[[i]]$valueDecimal
+    if(is.null(findingIntensity)){
+      findingIntensity <- NA
+    }
+    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity)
+    
+  }
+  
+  datatable$intensity <- as.numeric(datatable$intensity)
+  
+  #clear the console (disable this for debugging)
+  cat("\014")
+  
+  return(datatable)
+}
+
+## This function sets up a connection to MIDATA. OAuth authorization
+## is required during the process.
+## Input-values: url = the correct MIDATA URL (e.g. "https://test.midata.coop" for testing)
+##               forceLogin = TRUE, for forcing reauthentification of user
+##                            FALSE, for using (possibly) cached oAuth token
+## Return-value: A RonFHIR client that can be used for querying
+##
+##    Author: hessg1@bfh.ch  Date: 2018-11
+##    with very helpful input from Dick Chavez, I4MI
+##
+setupMidata <- function(url, forceLogin){
+  library(RonFHIR)
+  
+  # if 
+  if(forceLogin && file.exists(".httr-oauth")) {
+    file.remove(".httr-oauth")
+  }
+  
+  #Setting up the fhirClient
+  client <- fhirClient$new(paste(url, "/fhir", sep=""))
+  client_id <- "migrEnTest"
+  client_secret <- "migrend"
+  app_name <- "migrEnTest"
+  scopes <- ""
+  
+  # authorization stuff to retrieve a token
+  app <- httr::oauth_app(appname = app_name, client_id, client_secret)
+  oauth_endpoint <- httr::oauth_endpoint(authorize = paste(url, "/authservice?aud=", "http://localhost:1410", sep=""), access = client$tokenUrl)
+  
+  token <- httr::oauth2.0_token(endpoint = oauth_endpoint, app = app, scope = scopes)
+  
+  # set the token to the client
+  client$setToken(token$credentials$access_token)
+  rm(token)
+  
+  #clear the console (disable this for debugging)
+  cat("\014")
+  return(client)
+}
+
+## This function gets all observations of one user from midata. OAuth authorization
+## is required during the process.
+## Input-value: A RonFHIR client, set up with setupMidata()
+## Return-value: A nested dataframe, recommended to extract data with extractData() 
+##
+##    Author: hessg1@bfh.ch  Date: 2018-12-03
+##
+queryMidata <- function(client){
+  library(RonFHIR)
+  return(client$search("Observation", "code:in=418138009"))
+}

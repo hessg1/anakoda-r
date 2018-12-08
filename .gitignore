@@ -1,0 +1,4 @@
+data/*
+shiny/rsconnect
+.DS_Store
+.Rproj.user

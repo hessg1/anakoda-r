@@ -1,0 +1,12 @@
+name: migren
+title: migren
+username:
+account: migren
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 564255
+bundleId: 1719268
+url: https://migren.shinyapps.io/migren/
+when: 1543158309.11068
+asMultiple: FALSE
+asStatic: FALSE
