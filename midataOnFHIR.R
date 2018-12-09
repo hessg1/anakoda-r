@@ -1,5 +1,8 @@
+# this script is an example for how to retrieve and extract data from midata,
+# using the midata-helper functions.
+
 # import helper functions
-source('./shiny/functions0.4.R')
+source('./shiny/midata-helper.R')
 
 # Setting up the fhirClient
 client <- setupMidata("http://test.midata.coop", TRUE)
@@ -7,8 +10,8 @@ client <- setupMidata("http://test.midata.coop", TRUE)
 # make a query
 resources <- queryMidata(client)
 
-data2 <- extractData(resources)
-str(data$intensity)
+# extract data
+data <- extractData(resources)
 
-colours <- colorRampPalette(c('red','blue'))
-myColours <- colours(10)[as.numeric(cut(data$intensity,breaks = 10))]
+str(data)
+
