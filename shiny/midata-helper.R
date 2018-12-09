@@ -1,16 +1,50 @@
-## just here as a template
-convertTime <- function(input){
-  return(as.POSIXct(input, format="%Y-%m-%dT%H:%M:%S"))
+## This function further formats a dataset as retrieved from extractData(), as it factorizes
+## columns that need to be factorized, converts the time to a processable format and adds following
+## (calculated) rows: duration (the duration of the occurence), uid (a factorized user id), day (the day
+## of the occurence, without time).
+##
+## Parameters: 
+##   - dataset*: a data set like retrieved from extractData()
+## 
+## Return value:
+##   - the modified dataset, with added columns
+##
+## Author: hessg1@bfh.ch  Date: 2018-12-09
+##
+
+prepareData <- function(dataset){
+  # factorize
+  dataset$findingText <- factor(dataset$findingText)
+  dataset$bodysiteText <- factor(dataset$bodysiteText) 
+
+  # format time
+  dataset$timestamp <- as.POSIXct(dataset$timestamp, format="%Y-%m-%dT%H:%M:%S")
+  dataset$endTime <- as.POSIXct(dataset$endTime, format="%Y-%m-%dT%H:%M:%S")
+  dataset$startTime <- as.POSIXct(dataset$startTime, format="%Y-%m-%dT%H:%M:%S")
+  
+  # additional rows
+  dataset$day <- as.Date(dataset$startTime)
+  dataset$uid <- factor(dataset$name)
+  levels(dataset$uid) <- c("1", "2", "3", "4", "5")
+  dataset$duration <- dataset$endTime - dataset$startTime
+  
+  return(dataset)
 }
 
 
-##This function extracts the following data from a dataframe as returned when querying 
+
+## This function extracts the following data from a dataframe as returned when querying 
 ## observations from midata with RonFHIR
-## Return-value: dataframe with one observation per row in following order:
-## ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
-## Finding (as plain text), Finding (as SCT), Intensity of the Finding
 ##
-##    Author: hessg1@bfh.ch  Date: 2018-12-07
+## Parameters:
+##  - input*: The result of a midata query, as returned from queryMidata()
+## 
+## Return value: 
+##  - a dataframe with one observation per row in following order:
+##    ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
+##    Finding (as plain text), Finding (as SCT), Intensity of the Finding
+##
+## Author: hessg1@bfh.ch  Date: 2018-12-07
 ##
 extractData <- function(input){
   resources <- input$entry$resource
@@ -56,15 +90,18 @@ extractData <- function(input){
 
 ## This function sets up a connection to MIDATA. OAuth authorization
 ## is required during the process.
-## Input-values: url = the correct MIDATA URL (e.g. "https://test.midata.coop" for testing)
-##               forceLogin = TRUE, for forcing reauthentification of user
-##                            FALSE, for using (possibly) cached oAuth token
-## Return-value: A RonFHIR client that can be used for querying
+## 
+## Parameters: 
+##  - url = the correct MIDATA URL (e.g. "https://test.midata.coop" for testing, default)
+##  - forceLogin = TRUE (default), for forcing reauthentification of user
+##                 FALSE, for using (possibly) cached oAuth token
+## Return value:
+##   - A RonFHIR client that can be used for querying
 ##
 ##    Author: hessg1@bfh.ch  Date: 2018-11
 ##    with very helpful input from Dick Chavez, I4MI
 ##
-setupMidata <- function(url, forceLogin){
+setupMidata <- function(url = "http://test.midata.coop", forceLogin = TRUE){
   library(RonFHIR)
   
   # if 
@@ -96,8 +133,12 @@ setupMidata <- function(url, forceLogin){
 
 ## This function gets all observations of one user from midata. OAuth authorization
 ## is required during the process.
-## Input-value: A RonFHIR client, set up with setupMidata()
-## Return-value: A nested dataframe, recommended to extract data with extractData() 
+## 
+## Parameters: 
+##  - client*: A RonFHIR client, set up with setupMidata()
+##
+## Return value: 
+##  - A nested dataframe, recommended to extract data with extractData() 
 ##
 ##    Author: hessg1@bfh.ch  Date: 2018-12-03
 ##
