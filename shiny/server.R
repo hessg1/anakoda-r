@@ -8,36 +8,19 @@
 #
 
 library(shiny)
-source('functions0.3.R')
+source('midata-helper.R')
+source('graphics.R')
 
 # import and prepare data
-  # set up RonFHIR client (with new authentification every time)
-  client <- setupMidata("http://test.midata.coop", FALSE)
-  
-  # query resources
-  resources <- queryMidata(client)
+  # midata: load, extract, prepare
+    client <- setupMidata(forceLogin = FALSE)
+    conditions <- extractData(queryMidata(client))
+    conditions <- prepareData(conditions)
 
-  # extract data (for compatibility reasons we have to do special case for claudia at the moment)
-  if(resources$entry$resource$subject$display[1] == "Claudia Zimmermann"){
-    conditions <- extractData(resources)
-  } else {
-    conditions <- extractDataOld(resources)
-  }
-  
-  # do some factorizing
-  conditions$findingText <- factor(conditions$findingText)
-  conditions$bodysiteText <- factor(conditions$bodysiteText) 
-  
-  # convert timestamp to date
-  #conditions$duration = conditions$endTime - conditions$startTime
-  #conditions$startTime <- as.POSIXct(conditions$startTime, origin="1970-01-01")
-  conditions$day <- as.Date(conditions$startTime)
-  
-  headache <- data.frame(day = subset(conditions, conditions$intensity > 0)$day, intensity = subset(conditions, conditions$intensity > 0)$intensity)
-  colours <- colorRampPalette(c('red','green'))
-  headache$col <- colours(10)[as.numeric(cut((headache$intensity)/10,breaks = 10))]
-  # this does not work as intended, see https://stackoverflow.com/questions/9946630/colour-points-in-a-plot-differently-depending-on-a-vector-of-values
-  
+  # split off headache
+    headaches <- data.frame(day = subset(conditions, conditions$intensity > 0)$day, intensity = subset(conditions, conditions$intensity > 0)$intensity, duration = subset(conditions, conditions$intensity > 0)$duration, uid = subset(conditions, conditions$intensity > 0)$uid)
+    headaches <- colourize(headaches, c("darkolivegreen4", "yellow", "red"))
+
 # / import and prepare data
 
 
@@ -50,7 +33,7 @@ shinyServer(function(input, output) {
     title <- "Kopfschmerz-Intensität nach Tagen"
     alldates <- c()
     
-    alldates <- c(alldates, headache$day)
+    alldates <- c(alldates, headaches$day)
     
     if(input$autodate){
       if(length(alldates) == 0){
@@ -67,20 +50,20 @@ shinyServer(function(input, output) {
       endDate <- as.Date(input$daterange[2], origin="1970-01-01")
     }
     
-    dayFrame <- data.frame(day = seq(startDate, endDate, 1), pain_intensity=c(-1))
-    plot(dayFrame, ylim=c(0,10), type="n", xlab="Tag", ylab="Intensität Kopfschmerzen")
-    abline(v=startDate:endDate,lty=2,col="lightgrey")
-    curve(4*sin(0.5*x)+5, n = 1000, col = "salmon", add = TRUE)
-    
-    plotFrame <- merge(x=dayFrame,y=headache, all.x=TRUE)
-    lines(plotFrame$day, plotFrame$intensity, col = headache$col, type="p", pch=15)
+    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(1,5))
+    plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
+    if(input$patient > 0){
+     drawCurve(amplitude = input$amplitude, zero = input$patient, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
+    }
+    #drawCurve(amplitude = 0.25, zero = 4, threshold = 0.15, offset = -7.5, period = 10*pi, showLine = FALSE)
+    lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/6 )
 
     
 
   })
   output$stats <- renderPrint({
-    headache
+    headaches
   })
-  output$patname <- renderText({paste("Hallo,", conditions$name[1])})
+  output$patname <- renderText("Migraine curve")
   
 })
