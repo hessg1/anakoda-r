@@ -19,7 +19,7 @@ source('graphics.R')
 
   # split off headache
     headaches <- data.frame(day = subset(conditions, conditions$intensity > 0)$day, intensity = subset(conditions, conditions$intensity > 0)$intensity, duration = subset(conditions, conditions$intensity > 0)$duration, uid = subset(conditions, conditions$intensity > 0)$uid)
-    headaches <- colourize(headaches, c("darkolivegreen4", "yellow", "red"))
+    headaches <- colourize(headaches, c("darkolivegreen4", "orange", "red3"))
 
 # / import and prepare data
 
@@ -52,18 +52,22 @@ shinyServer(function(input, output) {
     
     dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(1,5))
     plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
+    
     if(input$patient > 0){
-     drawCurve(amplitude = input$amplitude, zero = input$patient, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
+      # draw migraine curve
+      drawCurve(amplitude = input$amplitude/2, zero = input$patient, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
     }
-    #drawCurve(amplitude = 0.25, zero = 4, threshold = 0.15, offset = -7.5, period = 10*pi, showLine = FALSE)
-    lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/6 )
-
+    # draw data points
+    lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/3 )
+    if(input$values){
+      text(plotFrame$day, plotFrame$uid, plotFrame$intensity, cex=0.6)
+    }
     
 
   })
-  output$stats <- renderPrint({
-    headaches
-  })
+  # output$stats <- renderPrint({
+  #   headaches
+  # })
   output$patname <- renderText("Migraine curve")
   
 })
