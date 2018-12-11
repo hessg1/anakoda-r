@@ -53,8 +53,8 @@ navbarPage("migrEn Data Viewer",
                         sliderInput(inputId = "offset", label = "offset", min=1, max=50, value=12),
                         sliderInput(inputId = "threshold", label = "threshold", min=0, max=0.5, value=0.2),
                         checkboxGroupInput(inputId = "symptoms", label="display findings", 
-                                           choiceNames = c("Nausea", "Menstruation", "Photophobia", "Phonophobia"),
-                                         choiceValues = c("422587007", "276319003", "409668002", "313387002")),
+                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
+                                          choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
                         
                         tags$h3("date range:"),
                         checkboxInput(inputId = "autodate", label = "auto", value = TRUE),
@@ -69,7 +69,7 @@ navbarPage("migrEn Data Viewer",
                       # Show a plot of the generated distribution
                       mainPanel(
                         plotOutput("intensity", height=700)
-                      #   verbatimTextOutput("stats")
+                         # , verbatimTextOutput("stats")
                       )
                     )
            )

@@ -10,6 +10,7 @@
 library(shiny)
 source('midata-helper.R')
 source('graphics.R')
+coding <- read.csv("codingSCT.csv", sep=",", header=T, row.names = "code")
 
 # import and prepare data
   # midata: load, extract, prepare
@@ -65,10 +66,11 @@ shinyServer(function(input, output) {
       text(plotFrame$day, plotFrame$uid, plotFrame$intensity, cex=0.6)
     }
     
-    i <- 1
+    # draw all checked symptoms
+    i <- 2
     if(!is.null(input$symptoms)){
       for(code in input$symptoms){
-        addToPlot(code, colour="wheat4", days = dayFrame, conditions = conditions, offset = i)
+        addToPlot(code, colour="wheat4", symbol=as.character(coding[code,'symbol']), days = dayFrame, conditions = conditions, offset = i)
         i <- i+1
       }
     }
@@ -76,9 +78,9 @@ shinyServer(function(input, output) {
     
 
   })
-  # output$stats <- renderPrint({
-  #   is.null(input$symptoms)
-  # })
+   # output$stats <- renderPrint({
+   #   conditions$findingText
+   # })
   output$patname <- renderText("Migraine curve")
   
 })
