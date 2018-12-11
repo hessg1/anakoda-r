@@ -25,7 +25,7 @@ prepareData <- function(dataset){
   # additional rows
   dataset$day <- as.Date(dataset$startTime)
   dataset$uid <- factor(dataset$name)
-  levels(dataset$uid) <- c("1", "2", "3", "4", "5")
+  levels(dataset$uid) <- c("1", "2", "3", "4", "5", "6")
   dataset$duration <- dataset$endTime - dataset$startTime
   
   return(dataset)
