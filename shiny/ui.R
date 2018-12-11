@@ -20,13 +20,12 @@ library(markdown)
 navbarPage("migrEn Data Viewer",
         
            #first Tab -> Headache data
-           tabPanel("Headache", selected=TRUE,
+           tabPanel("All patients", selected=TRUE,
                     
-                    # Sidebar with a slider input for number of bins 
                     sidebarLayout(
                       sidebarPanel(
                         tags$h3(textOutput("patname")),
-                        numericInput(inputId = "patient", label = "display curve for patient ID", min=0, max=5, step=1, value=0),
+                        numericInput(inputId = "patient", label = "display curve for patient ID", min=0, max=6, step=1, value=0),
                         
                         conditionalPanel(
                           inputId = "cond1",
@@ -49,7 +48,7 @@ navbarPage("migrEn Data Viewer",
                         
                         tags$h3("date range:"),
                         checkboxInput(inputId = "autodate", label = "auto", value = TRUE),
-                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to ")
+                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to ", start="2018-10-17", end="2018-11-16")
                       ),
                       
                       # Show a plot of the generated distribution
@@ -60,23 +59,17 @@ navbarPage("migrEn Data Viewer",
                     )
            ),
            
-           #second Tab -> more information
-           tabPanel("Summary",
-                    fluidRow(
-                      column(6,
-                             #includeMarkdown("introduction.md")
-                             helpText("Hallo")
+           #second Tab -> patient detail
+           tabPanel("patient detail",
+                    sidebarLayout(
+                      sidebarPanel(
+                        selectInput("uid", "Choose UID", choices = c('uid=1'='1','uid=2'='2', 'uid=3'='3','uid=4'='4','uid=5'='5','uid=6'='6'))
                       ),
-                      column(3,
-                             img(class="img-polaroid",
-                                 src="/img/bfh_logo_de.png"),
-                             tags$small(
-                               "Source: Photographed at the Bay State Antique ",
-                               "Automobile Club's July 10, 2005 show at the ",
-                               "Endicott Estate in Dedham, MA by ",
-                               a(href="http://commons.wikimedia.org/wiki/User:Sfoskett",
-                                 "User:Sfoskett")
-                             )
+                      
+                      # Show a plot of the generated distribution
+                      mainPanel(
+                        plotOutput("patientDetail", height=700)
+                        # , verbatimTextOutput("stats")
                       )
                     )
            )

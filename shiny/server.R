@@ -53,7 +53,7 @@ shinyServer(function(input, output) {
       endDate <- as.Date(input$daterange[2], origin="1970-01-01")
     }
     
-    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,5.2))
+    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,6.2))
     plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
     if(input$patient > 0 && is.numeric(input$patient)){
       # draw migraine curve
@@ -79,6 +79,19 @@ shinyServer(function(input, output) {
     
 
   })
+  
+  output$patientDetail <- renderPlot({
+    user <- subset(conditions, (conditions$uid == input$uid))
+    user <- subset(user, user$intensity > 0)
+    user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
+    firstDate <- min(user$time) - 1 
+    str(firstDate)
+    user <- rbind(user, data.frame(time=firstDate, intensity=0))
+    user <- user[order(user$time),]
+    
+    plot(user$time, user$intensity, type="s", col="mediumblue")
+  })
+  
    # output$stats <- renderPrint({
    #   conditions$findingText
    # })
