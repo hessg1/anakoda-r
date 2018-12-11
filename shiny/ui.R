@@ -11,7 +11,6 @@ library(shiny)
 library(markdown)
 
 
-# Define UI for application that draws a histogram
 #shinyUI(fluidPage(
 
 # Application title
@@ -19,7 +18,49 @@ library(markdown)
 
 #Navbar begin
 navbarPage("migrEn Data Viewer",
-           #First Tab -> Introduction
+        
+           #first Tab -> Headache data
+           tabPanel("Headache", selected=TRUE,
+                    
+                    # Sidebar with a slider input for number of bins 
+                    sidebarLayout(
+                      sidebarPanel(
+                        tags$h3(textOutput("patname")),
+                        numericInput(inputId = "patient", label = "display curve for patient ID", min=0, max=5, step=1, value=0),
+                        
+                        conditionalPanel(
+                          inputId = "cond1",
+                          condition = "input.patient > 0",
+                          sliderInput(inputId = "amplitude", label = "amplitude", min=0, max=1, value=0.6),
+                          sliderInput(inputId = "period", label = "period", min=1, max=50, value=31),
+                          sliderInput(inputId = "offset", label = "offset", min=0, max=50, value=12),
+                          sliderInput(inputId = "threshold", label = "threshold", min=0, max=0.5, value=0.2),
+                          checkboxInput(inputId = "line", label = "display threshold line", value = TRUE)
+                        ),
+                        
+                        checkboxGroupInput(inputId = "symptoms", label="display findings", 
+                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
+                                          choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
+                        
+        
+                        
+                        tags$br(),
+                        checkboxInput(inputId = "values", label = "show headache intensity values", value = FALSE),
+                        
+                        tags$h3("date range:"),
+                        checkboxInput(inputId = "autodate", label = "auto", value = TRUE),
+                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to ")
+                      ),
+                      
+                      # Show a plot of the generated distribution
+                      mainPanel(
+                        plotOutput("intensity", height=700)
+                         # , verbatimTextOutput("stats")
+                      )
+                    )
+           ),
+           
+           #second Tab -> more information
            tabPanel("Summary",
                     fluidRow(
                       column(6,
@@ -36,40 +77,6 @@ navbarPage("migrEn Data Viewer",
                                a(href="http://commons.wikimedia.org/wiki/User:Sfoskett",
                                  "User:Sfoskett")
                              )
-                      )
-                    )
-           ),
-           #Second Tab -> Headache (Define UI for application that draws a histogram)
-           tabPanel("Headache",
-                    
-                    # Sidebar with a slider input for number of bins 
-                    sidebarLayout(
-                      sidebarPanel(
-                        tags$h3(textOutput("patname")),
-                        numericInput(inputId = "patient", label = "display curve for patient ID", min=0, max=5, step=1, value=4),
-                        
-                        sliderInput(inputId = "amplitude", label = "amplitude", min=0, max=1, value=0.6),
-                        sliderInput(inputId = "period", label = "period", min=1, max=50, value=31),
-                        sliderInput(inputId = "offset", label = "offset", min=1, max=50, value=12),
-                        sliderInput(inputId = "threshold", label = "threshold", min=0, max=0.5, value=0.2),
-                        checkboxGroupInput(inputId = "symptoms", label="display findings", 
-                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
-                                          choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
-                        
-                        tags$h3("date range:"),
-                        checkboxInput(inputId = "autodate", label = "auto", value = TRUE),
-                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to "),
-                        
-                        tags$br(),
-                        checkboxInput(inputId = "line", label = "display threshold line", value = TRUE),
-                        checkboxInput(inputId = "values", label = "show intensity values", value = FALSE)
-
-                      ),
-                      
-                      # Show a plot of the generated distribution
-                      mainPanel(
-                        plotOutput("intensity", height=700)
-                         # , verbatimTextOutput("stats")
                       )
                     )
            )

@@ -7,11 +7,13 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-source('midata-helper.R')
-source('graphics.R')
-coding <- read.csv("codingSCT.csv", sep=",", header=T, row.names = "code")
-
+# import libraries, custom functions and snomed dictionary
+  library(shiny)
+  source('midata-helper.R')
+  source('graphics.R')
+  coding <- read.csv("codingSCT.csv", sep=",", header=T, row.names = "code")
+# / import libraries, custom functions and snomed dictionary
+  
 # import and prepare data
   # midata: load, extract, prepare
     client <- setupMidata(forceLogin = FALSE)
@@ -51,10 +53,9 @@ shinyServer(function(input, output) {
       endDate <- as.Date(input$daterange[2], origin="1970-01-01")
     }
     
-    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,5))
+    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,5.2))
     plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
-    
-    if(input$patient > 0){
+    if(input$patient > 0 && is.numeric(input$patient)){
       # draw migraine curve
       drawCurve(amplitude = input$amplitude/2, zero = input$patient, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
     }
