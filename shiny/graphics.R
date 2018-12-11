@@ -9,6 +9,9 @@
 ## - threshold: the cutoff-value (default: 0)
 ## - showLine: boolean, if TRUE a dotted horizontal line is plotted at the threshold (default: FALSE)
 ##
+## Return value:
+## - nothing (a plot is drawn)
+##
 ## Author: hessg1@bfh.ch  Date: 2018-12-09
 ##
 drawCurve <- function(amplitude = 1, period = 1, zero = 0, offset = 0, threshold = 0, showLine = FALSE){
@@ -20,6 +23,28 @@ drawCurve <- function(amplitude = 1, period = 1, zero = 0, offset = 0, threshold
   
 }
 
+## This function adds symptoms to an existing plot. The plot has already to be drawn.
+##
+## Parameters:
+## - sct*: the snomed CT code of the symptom to be drawn (has to be in "conditions", of course)
+## - symbol: the symbol that will be drawn on the graph (one character or integer) (default: 8)
+## - colour: what colour will the symbol be drawn (default: "darkgrey")
+## - offset: by how many positions the symbol will be offset from the users base line (default: 1)
+## - days: the data frame for the x-axis of the plot (usually dayFrame)
+## - conditions: the data frame with the actual data
+## 
+## Return value:
+## - nothing (a plot is drawn)
+##
+## Author: hessg1@bfh.ch  Date: 2018-12-10
+##
+addToPlot <- function(sct, symbol = 8, colour = "darkgrey", offset = 1, days = dayFrame, conditions = conditions){
+  if(is.character(sct)){
+    data <- data.frame(day = subset(conditions, conditions$findingSCT == sct)$day, uid = subset(conditions, conditions$findingSCT == sct)$uid, intensity = subset(conditions, conditions$findingSCT == sct)$intensity)
+  }
+  frame <- merge(x=days,y=data, all.x=TRUE)
+  lines(frame$day, as.numeric(frame$uid)-(offset/15), type="p", col = colour, pch = symbol, cex = 0.8)
+}
 
 
 ## This function adds a 'col' column to a dataset, with corresponding fading colour code 
@@ -29,11 +54,14 @@ drawCurve <- function(amplitude = 1, period = 1, zero = 0, offset = 0, threshold
 ## - dataset*: the dataset, has to have a row 'intensity'.
 ## - colours: a vector of the colours: first is the colour for the least intensity,
 ##            second is the colour for hightest intensity. in-between intensities are
-##            matched with calculated colours. default: from 'gold' to 'red'
+##            matched with calculated colours. default: from a dark green to yellow to red
+##
+## Return value:
+## - A dataset with an added colour column
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-12-09
 ##
-colourize <- function(dataset, colours = c('gold','red')){
+colourize <- function(dataset, colours = c("darkolivegreen4", "yellow", "red")){
   rbPal <- colorRampPalette(colours)
   dataset$col <- rbPal(10)[as.numeric(cut(dataset$intensity,breaks = 10))]
   return(dataset)
@@ -45,12 +73,14 @@ colourize <- function(dataset, colours = c('gold','red')){
 ## TODO: doku
 ## TODO: see how description of x-axis could work out
 ##
-preparePlot <- function(from = "2018-10-15", to="2018-11-20", label = "IntensitÃ¤t", yLim = c(0,10)){
+## Author: hessg1@bfh.ch  Date: 2018-12-09
+##
+preparePlot <- function(from = "2018-10-15", to="2018-11-20", label = "Intensity", yLim = c(0,10)){
   startDate <- as.Date(from)
   endDate <- as.Date(to)
   
   dayFrame <- data.frame(day = seq(startDate, endDate, 1), y=c(-1))
-  plot(dayFrame, ylim=yLim, type="n", xlab="Tag", ylab=label)
+  plot(dayFrame, ylim=yLim, type="n", xlab="day", ylab=label)
   abline(v=startDate:endDate,lty=2,col="whitesmoke")
   
   return(dayFrame)
@@ -75,23 +105,23 @@ preparePlot <- function(from = "2018-10-15", to="2018-11-20", label = "IntensitÃ
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-12-08
 ##
-drawCurveOld <- function(range = c(0, 10), amplitude = 1, period = 1, zeropoint = 0, offset = 0, threshold = 0, showLine = FALSE){
-  # setting the colors
-  .normCol <- "grey"
-  .highCol <- "orange"
-  
-  start <- range[1]
-  end <- range[2]
-  smoothing <- 190 + 10 * (amplitude / period)
-  
-  x <- (start:(end*smoothing))/smoothing
-  curve <- data.frame(x = x, y = zeropoint + (amplitude  * sin(2 * pi * (x-offset)/period)))
-  curve$col <- sapply(curve$y, function(value){
-    return(if(value > threshold) .highCol else .normCol)
-  })
-  
-  lines(curve$x,curve$y, type="p", pch=".", col = curve$col)
-  if(showLine){
-    abline(h=threshold, col="lightgrey", lty=3)
-  }
-}
+# drawCurveOld <- function(range = c(0, 10), amplitude = 1, period = 1, zeropoint = 0, offset = 0, threshold = 0, showLine = FALSE){
+#   # setting the colors
+#   .normCol <- "grey"
+#   .highCol <- "orange"
+#   
+#   start <- range[1]
+#   end <- range[2]
+#   smoothing <- 190 + 10 * (amplitude / period)
+#   
+#   x <- (start:(end*smoothing))/smoothing
+#   curve <- data.frame(x = x, y = zeropoint + (amplitude  * sin(2 * pi * (x-offset)/period)))
+#   curve$col <- sapply(curve$y, function(value){
+#     return(if(value > threshold) .highCol else .normCol)
+#   })
+#   
+#   lines(curve$x,curve$y, type="p", pch=".", col = curve$col)
+#   if(showLine){
+#     abline(h=threshold, col="lightgrey", lty=3)
+#   }
+# }

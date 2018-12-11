@@ -28,7 +28,7 @@ navbarPage("migrEn Data Viewer",
                       ),
                       column(3,
                              img(class="img-polaroid",
-                                 src=paste0("/img/bfh_logo_de.png")),
+                                 src="/img/bfh_logo_de.png"),
                              tags$small(
                                "Source: Photographed at the Bay State Antique ",
                                "Automobile Club's July 10, 2005 show at the ",
@@ -52,19 +52,24 @@ navbarPage("migrEn Data Viewer",
                         sliderInput(inputId = "period", label = "period", min=1, max=50, value=31),
                         sliderInput(inputId = "offset", label = "offset", min=1, max=50, value=12),
                         sliderInput(inputId = "threshold", label = "threshold", min=0, max=0.5, value=0.2),
-                        checkboxInput(inputId = "line", label = "display threshold line", value = TRUE),
+                        checkboxGroupInput(inputId = "symptoms", label="display findings", 
+                                           choiceNames = c("Nausea", "Menstruation", "Photophobia", "Phonophobia"),
+                                         choiceValues = c("422587007", "276319003", "409668002", "313387002")),
                         
-                        tags$br(),
-                        checkboxInput(inputId = "values", label = "show intensity values", value = FALSE),
                         tags$h3("date range:"),
                         checkboxInput(inputId = "autodate", label = "auto", value = TRUE),
-                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to ")
+                        dateRangeInput(inputId = "daterange", label = NULL, language = "en", separator = " to "),
+                        
+                        tags$br(),
+                        checkboxInput(inputId = "line", label = "display threshold line", value = TRUE),
+                        checkboxInput(inputId = "values", label = "show intensity values", value = FALSE)
+
                       ),
                       
                       # Show a plot of the generated distribution
                       mainPanel(
                         plotOutput("intensity", height=700)
-                        # verbatimTextOutput("stats")
+                      #   verbatimTextOutput("stats")
                       )
                     )
            )

@@ -50,7 +50,7 @@ shinyServer(function(input, output) {
       endDate <- as.Date(input$daterange[2], origin="1970-01-01")
     }
     
-    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(1,5))
+    dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,5))
     plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
     
     if(input$patient > 0){
@@ -59,14 +59,25 @@ shinyServer(function(input, output) {
     }
     # draw data points
     lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/3 )
+    
+    # draw intensity values if requested
     if(input$values){
       text(plotFrame$day, plotFrame$uid, plotFrame$intensity, cex=0.6)
     }
     
+    i <- 1
+    if(!is.null(input$symptoms)){
+      for(code in input$symptoms){
+        addToPlot(code, colour="wheat4", days = dayFrame, conditions = conditions, offset = i)
+        i <- i+1
+      }
+    }
+    
+    
 
   })
   # output$stats <- renderPrint({
-  #   headaches
+  #   is.null(input$symptoms)
   # })
   output$patname <- renderText("Migraine curve")
   
