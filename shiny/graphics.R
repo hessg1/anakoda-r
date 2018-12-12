@@ -43,7 +43,7 @@ addToPlot <- function(sct, symbol = 8, colour = "darkgrey", offset = 1, days = d
     data <- data.frame(day = subset(conditions, conditions$findingSCT == sct)$day, uid = subset(conditions, conditions$findingSCT == sct)$uid, intensity = subset(conditions, conditions$findingSCT == sct)$intensity)
   }
   frame <- merge(x=days,y=data, all.x=TRUE)
-  lines(frame$day, as.numeric(frame$uid)-(offset/15), type="p", col = colour, pch = symbol, cex = 0.8)
+  lines(frame$day, as.numeric(frame$uid)-(offset/5), type="p", col = colour, pch = symbol, cex = 0.8)
 }
 
 

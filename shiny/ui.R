@@ -25,7 +25,8 @@ navbarPage("migrEn Data Viewer",
                     sidebarLayout(
                       sidebarPanel(
                         tags$h3(textOutput("patname")),
-                        numericInput(inputId = "patient", label = "display curve for patient ID", min=0, max=6, step=1, value=0),
+                        # TODO: dynamically generate choices list with actual number of patients
+                        selectInput("patient", "display curve for patient ID", choices = c('none'=0, 'Patient 1'=1,'Patient 2'=2, 'Patient 3'=3,'Patient 4'=4,'Patient 5'=5,'Patient 6'=6)),
                         
                         conditionalPanel(
                           inputId = "cond1",
@@ -63,7 +64,13 @@ navbarPage("migrEn Data Viewer",
            tabPanel("patient detail",
                     sidebarLayout(
                       sidebarPanel(
-                        selectInput("uid", "Choose UID", choices = c('uid=1'='1','uid=2'='2', 'uid=3'='3','uid=4'='4','uid=5'='5','uid=6'='6'))
+                        # TODO: dynamically generate choices list with actual number of patients
+                        selectInput("uid", "Choose UID", choices = c('Patient 1'='1','Patient 2'='2', 'Patient 3'='3','Patient 4'='4','Patient 5'='5','Patient 6'='6')),
+                        
+                        tags$h3("date range:"),
+                        checkboxInput(inputId = "autodate2", label = "auto", value = TRUE),
+                        dateRangeInput(inputId = "daterange2", label = NULL, language = "en", separator = " to ", start="2018-10-17", end="2018-11-16")
+                        
                       ),
                       
                       # Show a plot of the generated distribution

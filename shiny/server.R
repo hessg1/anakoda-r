@@ -55,9 +55,10 @@ shinyServer(function(input, output) {
     
     dayFrame <- preparePlot(from=startDate, to=endDate,label="UID", yLim=c(0.5,6.2))
     plotFrame <- merge(x=dayFrame,y=headaches, all.x=TRUE)
-    if(input$patient > 0 && is.numeric(input$patient)){
+    pat <- as.numeric(input$patient)
+    if(pat > 0){
       # draw migraine curve
-      drawCurve(amplitude = input$amplitude/2, zero = input$patient, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
+      drawCurve(amplitude = input$amplitude/2, zero = pat, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
     }
     # draw data points
     lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/3 )
@@ -80,16 +81,17 @@ shinyServer(function(input, output) {
 
   })
   
+  ## plot defacto migraine intensity curve
   output$patientDetail <- renderPlot({
     user <- subset(conditions, (conditions$uid == input$uid))
     user <- subset(user, user$intensity > 0)
     user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
     firstDate <- min(user$time) - 1 
-    str(firstDate)
     user <- rbind(user, data.frame(time=firstDate, intensity=0))
     user <- user[order(user$time),]
     
     plot(user$time, user$intensity, type="s", col="mediumblue")
+    
   })
   
    # output$stats <- renderPrint({
