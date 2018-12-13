@@ -14,10 +14,10 @@ library(markdown)
 #shinyUI(fluidPage(
 
 # Application title
-# titlePanel("migrEn data view"),
+# titlePanel("migraine data viewer"),
 
 #Navbar begin
-navbarPage("migrEn Data Viewer",
+navbarPage("migraine data viewer",
         
            #first Tab -> Headache data
            tabPanel("All patients", selected=TRUE,
@@ -61,11 +61,17 @@ navbarPage("migrEn Data Viewer",
            ),
            
            #second Tab -> patient detail
-           tabPanel("patient detail",
+           tabPanel("Patient detail",
                     sidebarLayout(
                       sidebarPanel(
                         # TODO: dynamically generate choices list with actual number of patients
-                        selectInput("uid", "Choose UID", choices = c('Patient 1'='1','Patient 2'='2', 'Patient 3'='3','Patient 4'='4','Patient 5'='5','Patient 6'='6')),
+                        selectInput("uid", "Choose Patient", choices = c('Patient 1'='1','Patient 2'='2', 'Patient 3'='3','Patient 4'='4','Patient 5'='5','Patient 6'='6')),
+                        
+                        checkboxGroupInput(inputId = "symptoms2", label="display findings", 
+                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
+                                           choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
+                        
+                        checkboxInput(inputId = "asdfsad", label = "show migraine curve", value = TRUE),
                         
                         tags$h3("date range:"),
                         checkboxInput(inputId = "autodate2", label = "auto", value = TRUE),

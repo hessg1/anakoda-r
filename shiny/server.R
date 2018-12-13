@@ -83,14 +83,23 @@ shinyServer(function(input, output) {
   
   ## plot defacto migraine intensity curve
   output$patientDetail <- renderPlot({
-    user <- subset(conditions, (conditions$uid == input$uid))
-    user <- subset(user, user$intensity > 0)
-    user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
-    firstDate <- min(user$time) - 1 
-    user <- rbind(user, data.frame(time=firstDate, intensity=0))
-    user <- user[order(user$time),]
+
+    ## adjust date
+    if(input$autodate2){
+      daterange <- NULL
+    }
+    else{
+      daterange <- c(input$daterange2[1],input$daterange2[2])
+    }
     
-    plot(user$time, user$intensity, type="s", col="mediumblue")
+    plotBySCT(userid=input$uid, conditions = conditions, daterange = daterange)
+    
+    if(!is.null(input$symptoms2)){
+      for(code in input$symptoms2){
+        plotBySCT(sct=code, userid=input$uid, conditions = conditions, colour= coding[code,'col'], daterange = daterange)
+      }
+    }
+   
     
   })
   

@@ -1,21 +1,21 @@
-code,textEN,textDE,symbol
-73905001,Sees flickering lights,Flimmersehen,F
-422587007,Nausea,Übelkeit,N
-409668002,Photophobia,Lichtempfindlichkeit,P
-313387002,Phonophobia,Lärmempfindlichkeit,O
-420103007,Watery eye,Tränende Augen,T
-703630003,Red eye,Gerötete Augen,R
-276319003,Menstruation,Menstruation,M
-216299002,Attack,Anfall,-
-73595000,Stress,Stress,S
-102894008,Relaxed feeling,Entspannt,-
-279079003,Dysaesthesia,Gefühlsstörung,D
-29164008,Speech impairment,Sprachstörung,I
-64531003,Nasal discharge,Nasenlaufen,L
-119711004,Nose closure,Verstopfte Nase,C
-45846002,Hyperosmia,Geruchsempfindlichkeit,H
-1985008,Vomitus,Erbrechen,V
-162308004,Throbbing Headache,Pulsierende Kopfschmerzen,-
-162309007,Shooting Headache,Einschiessende Kopfschmerzen,-
-162307009,Aching Headache,Stechende Kopfschmerzen,-
-45893009,Weather,Wetter,W
+code,textEN,textDE,symbol,col
+73905001,Sees flickering lights,Flimmersehen,F,hotpink1
+422587007,Nausea,Übelkeit,N,palevioletred
+409668002,Photophobia,Lichtempfindlichkeit,P,orange3
+313387002,Phonophobia,Lärmempfindlichkeit,orangered
+420103007,Watery eye,Tränende Augen,T,grey
+703630003,Red eye,Gerötete Augen,R,grey
+276319003,Menstruation,Menstruation,M,grey
+216299002,Attack,Anfall,-,grey
+73595000,Stress,Stress,S,grey
+102894008,Relaxed feeling,Entspannt,-,grey
+279079003,Dysaesthesia,Gefühlsstörung,D,grey
+29164008,Speech impairment,Sprachstörung,I,grey
+64531003,Nasal discharge,Nasenlaufen,L,grey
+119711004,Nose closure,Verstopfte Nase,C,grey
+45846002,Hyperosmia,Geruchsempfindlichkeit,H,seagreen4
+1985008,Vomitus,Erbrechen,V,grey
+162308004,Throbbing Headache,Pulsierende Kopfschmerzen,-,grey
+162309007,Shooting Headache,Einschiessende Kopfschmerzen,-,grey
+162307009,Aching Headache,Stechende Kopfschmerzen,-,grey
+45893009,Weather,Wetter,W,grey
