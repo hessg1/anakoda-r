@@ -86,7 +86,8 @@ shinyServer(function(input, output) {
 
     ## adjust date
     if(input$autodate2){
-      daterange <- NULL
+      usr <- subset(conditions, conditions$uid == input$uid)
+      daterange <- c(min(usr$startTime) - (24*60*60), max(usr$endTime) + (24*60*60))
     }
     else{
       daterange <- c(input$daterange2[1],input$daterange2[2])

@@ -4,7 +4,7 @@
 ## Author: hessg1@bfh.ch  Date: 2018-12-12
 ##
 
-plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", daterange = NULL){
+plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", daterange){
   user <- subset(conditions, (conditions$uid == userid))
   if(is.null(sct)){
     user <- subset(user, (user$findingSCT == "162308004" | user$findingSCT == "162307009"))
@@ -17,26 +17,27 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
     line <- "dotted"
     par(new=TRUE)
   }
-  
-  user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
-  mydate <- min(user$time) - 1 
-  user <- rbind(user, data.frame(time=mydate, intensity=0))
-  
-  if(is.null(daterange)){
-    startdate <-  min(user$time) - (24*60*60)
-    enddate <- max(user$time) + (24*60*60)
+  if(length(user$uid) > 0){
+    user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
+    mydate <- min(user$time) - 1 
+    user <- rbind(user, data.frame(time=mydate, intensity=0))
+    
+    # if(is.null(daterange)){
+    #   startdate <-  min(user$time) - (24*60*60)
+    #   enddate <- max(user$time) + (24*60*60)
+    # }
+    # else {
+      startdate <- daterange[1]
+      enddate <- daterange[2]
+    # }
+    
+    user <- rbind(user, data.frame(time=startdate, intensity=0))
+    user <- rbind(user, data.frame(time=enddate, intensity=0))
+    
+    user <- user[order(user$time),]
+    
+    plot(user$time, user$intensity, type="s", lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
   }
-  else {
-    startdate <- daterange[1]
-    enddate <- daterange[2]
-  }
-  
-  user <- rbind(user, data.frame(time=startdate, intensity=0))
-  user <- rbind(user, data.frame(time=enddate, intensity=0))
-  
-  user <- user[order(user$time),]
-  
-  plot(user$time, user$intensity, type="s", lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
 }
 
 
@@ -115,6 +116,7 @@ colourize <- function(dataset, colours = c("darkolivegreen4", "yellow", "red")){
 ## not for plotting negative y-values
 ## TODO: doku
 ## TODO: see how description of x-axis could work out
+##       https://stackoverflow.com/questions/4843969/plotting-time-series-with-date-labels-on-x-axis
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-12-09
 ##
