@@ -21,7 +21,7 @@
     conditions <- prepareData(conditions)
 
   # split off headache
-    headaches <- data.frame(day = subset(conditions, conditions$intensity > 0)$day, intensity = subset(conditions, conditions$intensity > 0)$intensity, duration = subset(conditions, conditions$intensity > 0)$duration, uid = subset(conditions, conditions$intensity > 0)$uid)
+    headaches <- data.frame(day = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$day, intensity = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$intensity, duration = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$duration, uid = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$uid)
     headaches <- colourize(headaches, c("darkolivegreen4", "orange", "red3"))
 
 # / import and prepare data
