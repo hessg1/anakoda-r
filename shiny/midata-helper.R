@@ -115,6 +115,7 @@ setupMidata <- function(url = "http://test.midata.coop", forceLogin = TRUE){
   client_secret <- "migrend"
   app_name <- "migrEnTest"
   scopes <- ""
+  options(httr_oauth_cache=T)
   
   # authorization stuff to retrieve a token
   app <- httr::oauth_app(appname = app_name, client_id, client_secret)
