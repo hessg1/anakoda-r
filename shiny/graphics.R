@@ -1,16 +1,27 @@
-## not for plotting negative y-values
-## TODO: doku
+## Plots the actual headache intensity over time, or adds an additional finding to a plot of headache intensity.
+##
+## Parameters:
+## - userid*: the id of the patient whose data should be drawn
+## - sct: the snomed CT code of the finding to be plotted (default: all headache codes)
+## - conditions*: the dataset with the headache data and findings
+## - colour: the colour of the plot (default: "steelblue3")
+## - daterange: the data range of the plot, as a vector with start and enddate, as POSIXct.
+##
+## Return value:
+## - nothing (a plot is drawn)
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-12-12
 ##
 
 plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", daterange){
   user <- subset(conditions, (conditions$uid == userid))
+  # if no SCT code is given, we will later draw all headache codes:
   if(is.null(sct)){
     user <- subset(user, (user$findingSCT == "162308004" | user$findingSCT == "162307009"))
     size <- 2
     line <- "solid"
   }
+  # else we can extract the wanted code
   else{
     user <- subset(user, (user$findingSCT == sct))
     size <- 1
@@ -19,21 +30,19 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
   }
   if(length(user$uid) > 0){
     user <- merge(data.frame(intensity = user$intensity, time = user$startTime), data.frame(intensity = c(0), time = user$endTime), all=TRUE)
+   
+    # add a zero value before the first entry, so the curve starts at the bottom of the graph
     mydate <- min(user$time) - 1 
     user <- rbind(user, data.frame(time=mydate, intensity=0))
     
-    # if(is.null(daterange)){
-    #   startdate <-  min(user$time) - (24*60*60)
-    #   enddate <- max(user$time) + (24*60*60)
-    # }
-    # else {
-      startdate <- daterange[1]
-      enddate <- daterange[2]
-    # }
+    #define data range or plot
+    startdate <- daterange[1]
+    enddate <- daterange[2]
     
     user <- rbind(user, data.frame(time=startdate, intensity=0))
     user <- rbind(user, data.frame(time=enddate, intensity=0))
     
+    # make sure data is plotted in chronological order
     user <- user[order(user$time),]
     
     plot(user$time, user$intensity, type="s", lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
@@ -87,7 +96,7 @@ addToPlot <- function(sct, symbol = 8, colour = "darkgrey", offset = 1, days = d
     data <- data.frame(day = subset(conditions, conditions$findingSCT == sct)$day, uid = subset(conditions, conditions$findingSCT == sct)$uid, intensity = subset(conditions, conditions$findingSCT == sct)$intensity)
   }
   frame <- merge(x=days,y=data, all.x=TRUE)
-  lines(frame$day, as.numeric(frame$uid)-(offset/5), type="p", col = colour, pch = symbol, cex = 0.8)
+  lines(frame$day, as.numeric(frame$uid)-(offset/10), type="p", col = colour, pch = symbol, cex = 0.8)
 }
 
 
