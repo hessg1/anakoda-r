@@ -65,14 +65,6 @@ extractDataFinal <- function(input){
     findingText <- resources$valueCodeableConcept$coding[[i]]$display
     findingSCT <- resources$valueCodeableConcept$coding[[i]]$code
     
-    findingIntensity <- resources$extension[[i]]$valueDecimal #old way
-    if(is.null(findingIntensity)){
-      findingIntensity <- resources$component[[i]]$valueQuantity$value # try the new way
-      if(is.null(findingIntensity)){
-        findingIntensity <- NA # when it's still NULL, it should be NA
-      }
-    }
-    
     # we the following values can also be NULL and must then be NA
     if(is.null(bodysiteSCT)){
       bodysiteSCT <- NA
@@ -83,7 +75,24 @@ extractDataFinal <- function(input){
     if(is.null(findingSCT)){
       findingSCT <- NA
     }
+    if(is.null(findingText)){
+      findingText <- NA
+    }
     
+    
+    
+    findingIntensity <- resources$extension[[i]]$valueDecimal #old way
+    if(is.null(findingIntensity)){
+      findingIntensity <- resources$component[[i]]$valueQuantity$value # try the new way
+      if(is.null(findingIntensity)){
+        findingIntensity <- NA # when it's still NULL, it should be NA
+        #if(findingSCT == "276319003"| findingSCT == "73595000" | findingSCT == "309253009" | findingSCT == "102894008" | findingSCT == "106126000"){
+        #  findingIntensity <- 10 # non quantified values are 10 when present (and not persisted when absent)
+        #}
+      }
+    }
+    
+
     
     datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity)
     
