@@ -32,6 +32,71 @@ prepareData <- function(dataset){
 }
 
 
+## This function extracts the following data from a dataframe as returned when querying 
+## observations from midata with RonFHIR; and works with the old data set (from paper-
+## based headache diary) as well as the version persisted by the heMigrania app.
+##
+## Parameters:
+##  - input*: The result of a midata query, as returned from queryMidata()
+## 
+## Return value: 
+##  - a dataframe with one observation per row in following order:
+##    ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
+##    Finding (as plain text), Finding (as SCT), Intensity of the Finding
+##
+## Author: hessg1@bfh.ch  Date: 2019-01-14
+##
+extractDataFinal <- function(input){
+  resources <- input$entry$resource
+  numberOfObservations <- dim(resources)[1]
+  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector() ) 
+  for(i in 1:numberOfObservations){
+    
+    # metadata
+    ID <- resources$id[i]
+    name <- resources$subject$display[i]
+    startTime <- resources$effectivePeriod$start[i]
+    endTime <- resources$effectivePeriod$end[i]
+    timestamp <- resources$meta$lastUpdated[i] 
+    
+    # "load" data
+    bodysiteSCT <- resources$bodySite$coding[[i]]$code
+    bodysiteText <- resources$bodySite$coding[[i]]$display
+    findingText <- resources$valueCodeableConcept$coding[[i]]$display
+    findingSCT <- resources$valueCodeableConcept$coding[[i]]$code
+    
+    findingIntensity <- resources$extension[[i]]$valueDecimal #old way
+    if(is.null(findingIntensity)){
+      findingIntensity <- resources$component[[i]]$valueQuantity$value # try the new way
+      if(is.null(findingIntensity)){
+        findingIntensity <- NA # when it's still NULL, it should be NA
+      }
+    }
+    
+    # we the following values can also be NULL and must then be NA
+    if(is.null(bodysiteSCT)){
+      bodysiteSCT <- NA
+    }
+    if(is.null(bodysiteText)){
+      bodysiteText <- NA
+    }
+    if(is.null(findingSCT)){
+      findingSCT <- NA
+    }
+    
+    
+    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity)
+    
+  }
+  
+  datatable$intensity <- as.numeric(datatable$intensity)
+  
+  #clear the console (disable this for debugging)
+  cat("\014")
+  
+  return(datatable)
+}
+
 
 ## This function extracts the following data from a dataframe as returned when querying 
 ## observations from midata with RonFHIR
@@ -145,5 +210,5 @@ setupMidata <- function(url = "http://test.midata.coop", forceLogin = TRUE){
 ##
 queryMidata <- function(client){
   library(RonFHIR)
-  return(client$search("Observation", "code:in=418138009"))
+  return(client$search("Observation", "code:in=418138009")) #"code:in=418138009"))
 }

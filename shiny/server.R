@@ -12,12 +12,13 @@
   source('midata-helper.R')
   source('graphics.R')
   coding <- read.csv("codingSCT.csv", sep=",", header=T, row.names = "code")
+  debug <- "OK"
 # / import libraries, custom functions and snomed dictionary
   
 # import and prepare data
   # midata: load, extract, prepare
     client <- setupMidata(forceLogin = FALSE)
-    conditions <- extractData(queryMidata(client))
+    conditions <- extractDataFinal(queryMidata(client))
     conditions <- prepareData(conditions)
 
   # split off headache
@@ -61,7 +62,7 @@ shinyServer(function(input, output) {
       drawCurve(amplitude = input$amplitude/2, zero = pat, threshold = input$threshold, offset = input$offset, period = input$period, showLine = input$line)
     }
     # draw data points
-    lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/3 )
+    lines(plotFrame$day, plotFrame$uid, type="p", col=plotFrame$col, pch = 16, cex = (plotFrame$duration)/2 )
     
     # draw intensity values if requested
     if(input$values){
@@ -69,7 +70,7 @@ shinyServer(function(input, output) {
     }
     
     # draw all checked symptoms
-    i <- 2
+    i <- 1
     if(!is.null(input$symptoms)){
       for(code in input$symptoms){
         addToPlot(code, colour="wheat4", symbol=as.character(coding[code,'symbol']), days = dayFrame, conditions = conditions, offset = i)
@@ -83,6 +84,7 @@ shinyServer(function(input, output) {
   
   ## plot defacto migraine intensity curve
   output$patientDetail <- renderPlot({
+    
 
     ## adjust date
     if(input$autodate2){
@@ -97,16 +99,17 @@ shinyServer(function(input, output) {
     
     if(!is.null(input$symptoms2)){
       for(code in input$symptoms2){
-        plotBySCT(sct=code, userid=input$uid, conditions = conditions, colour= coding[code,'col'], daterange = daterange)
+        
+        plotBySCT(sct=code, userid=input$uid, conditions = conditions, colour= as.character(coding[code,'col']), daterange = daterange)
       }
     }
    
     
   })
   
-   # output$stats <- renderPrint({
-   #   conditions$findingText
-   # })
+    # output$stats2 <- renderPrint({
+    #   debug
+    # })
   output$patname <- renderText("Migraine curve")
   
 })
