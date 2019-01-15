@@ -67,13 +67,13 @@ navbarPage("migraine data viewer",
                         # TODO: dynamically generate choices list with actual number of patients
                         selectInput("uid", "Choose Patient", choices = c('Patient 1'='1','Patient 2'='2', 'Patient 3'='3','Patient 4'='4','Patient 5'='5','Patient 6'='6')),
                         
-                       # checkboxGroupInput(inputId = "symptoms2", label="display findings", 
-                        #                   choiceNames = c("Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
-                         #                  choiceValues = c("162057007","409668002","313387002","45846002",       "276319003",        "73595000")),
+                        checkboxGroupInput(inputId = "symptoms2", label="display findings", 
+                                           choiceNames = c("Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
+                                           choiceValues = c("162057007","409668002","313387002","45846002",       "276319003",        "73595000")),
                         
-                        radioButtons(inputId = "symptoms2", label="display findings", 
-                                     choiceNames = c("none", "Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
-                                     choiceValues = c("","162057007","409668002","313387002","45846002",       "276319003",        "73595000")),
+                      #  radioButtons(inputId = "symptoms2", label="display findings", 
+                       #              choiceNames = c("none", "Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
+                        #             choiceValues = c("","162057007","409668002","313387002","45846002",       "276319003",        "73595000")),
                         
                         
                         tags$h3("date range:"),

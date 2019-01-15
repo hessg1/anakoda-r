@@ -95,12 +95,15 @@ shinyServer(function(input, output) {
       daterange <- c(input$daterange2[1],input$daterange2[2])
     }
     
-    plotBySCT(userid=input$uid, conditions = conditions, daterange = daterange)
+    
+    plotBySCT(userid=input$uid, conditions = conditions, daterange = daterange, description = "Headache", ypos = 10)
+    
+    pos <- 9.5
     
     if(!is.null(input$symptoms2)){
       for(code in input$symptoms2){
-        
-        plotBySCT(sct=code, userid=input$uid, conditions = conditions, colour= as.character(coding[code,'col']), daterange = daterange)
+        plotBySCT(sct=code, userid=input$uid, conditions = conditions, colour= as.character(coding[code,'col']), daterange = daterange, description = as.character(coding[code,'textEN']), ypos = pos)
+        pos <- pos - 0.5
       }
     }
    

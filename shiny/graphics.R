@@ -13,7 +13,8 @@
 ## Author: hessg1@bfh.ch  Date: 2018-12-12
 ##
 
-plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", daterange){
+
+plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", daterange, description, ypos){
   user <- subset(conditions, (conditions$uid == userid))
   # if no SCT code is given, we will later draw all headache codes:
   if(is.null(sct)){
@@ -54,7 +55,8 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
     # make sure data is plotted in chronological order
     user <- user[order(user$time),]
     
-    plot(user$time, user$intensity, type=typ, lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
+    plot(user$time, user$intensity, type=typ, lty= line, col=colour, ylab="intensity", xlab="day", lwd = size, ylim = c(0,10))
+    legend(startdate, ypos , legend = description , col=colour, lty=line, cex=0.8, box.lty=0)
   }
 }
 
