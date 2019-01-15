@@ -68,10 +68,10 @@ navbarPage("migraine data viewer",
                         selectInput("uid", "Choose Patient", choices = c('Patient 1'='1','Patient 2'='2', 'Patient 3'='3','Patient 4'='4','Patient 5'='5','Patient 6'='6')),
                         
                         checkboxGroupInput(inputId = "symptoms2", label="display findings", 
-                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
-                                           choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
+                                           choiceNames = c("Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
+                                           choiceValues = c("422587007","409668002","313387002","45846002",       "276319003",        "73595000")),
                         
-                        checkboxInput(inputId = "asdfsad", label = "show migraine curve", value = TRUE),
+                        #checkboxInput(inputId = "asdfsad", label = "show migraine curve", value = FALSE),
                         
                         tags$h3("date range:"),
                         checkboxInput(inputId = "autodate2", label = "auto", value = TRUE),
@@ -79,10 +79,9 @@ navbarPage("migraine data viewer",
                         
                       ),
                       
-                      # Show a plot of the generated distribution
                       mainPanel(
                         plotOutput("patientDetail", height=700)
-                        # , verbatimTextOutput("stats")
+                        # , verbatimTextOutput("stats2")
                       )
                     )
            )
