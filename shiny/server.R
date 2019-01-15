@@ -22,14 +22,14 @@
     conditions <- prepareData(conditions)
 
   # split off headache
-    headaches <- data.frame(day = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$day, intensity = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$intensity, duration = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$duration, uid = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009")  )$uid)
+    headaches <- data.frame(day = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007"))$day, intensity = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007")  )$intensity, duration = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007")  )$duration, uid = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007"))$uid)
     headaches <- colourize(headaches, c("darkolivegreen4", "orange", "red3"))
 
 # / import and prepare data
 
 
 
-# Define server logic required to draw a histogram
+
 shinyServer(function(input, output) {
    
   output$intensity <- renderPlot({

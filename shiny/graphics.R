@@ -17,15 +17,24 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
   user <- subset(conditions, (conditions$uid == userid))
   # if no SCT code is given, we will later draw all headache codes:
   if(is.null(sct)){
-    user <- subset(user, (user$findingSCT == "162308004" | user$findingSCT == "162307009"))
-    size <- 2
+    user <- subset(user, (user$findingSCT == "162308004" | user$findingSCT == "162307009" | user$findingSCT== "162309007"))
+    size <- 3
+    typ <- "s"
     line <- "solid"
+  }
+  else if(sct == "276319003" | sct == "73595000"){
+    user <- subset(user, (user$findingSCT == sct))
+    size <- 10
+    typ <- "p"
+    line <- "blank"
+    par(new=TRUE)
   }
   # else we can extract the wanted code
   else{
     user <- subset(user, (user$findingSCT == sct))
-    size <- 1
+    size <- 3
     line <- "dotted"
+    typ <- "s"
     par(new=TRUE)
   }
   if(length(user$uid) > 0){
@@ -45,7 +54,7 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
     # make sure data is plotted in chronological order
     user <- user[order(user$time),]
     
-    plot(user$time, user$intensity, type="s", lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
+    plot(user$time, user$intensity, type=typ, lty= line, col=colour, ylab="headache intensity", xlab="day", lwd = size, ylim = c(0,10))
   }
 }
 

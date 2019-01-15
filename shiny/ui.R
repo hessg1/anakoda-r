@@ -39,8 +39,8 @@ navbarPage("migraine data viewer",
                         ),
                         
                         checkboxGroupInput(inputId = "symptoms", label="display findings", 
-                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)", "Weather influence (W)"),
-                                          choiceValues = c("422587007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000",   "45893009")),
+                                           choiceNames = c("Nausea (N)", "Photophobia (P)", "Phonophobia (O)", "Hyperosmia (H)", "Menstruation (M)", "Stress (S)"),
+                                          choiceValues = c("162057007",  "409668002",       "313387002",       "45846002",       "276319003",        "73595000")),
                         
         
                         
@@ -69,7 +69,7 @@ navbarPage("migraine data viewer",
                         
                         checkboxGroupInput(inputId = "symptoms2", label="display findings", 
                                            choiceNames = c("Nausea", "Photophobia", "Phonophobia", "Hyperosmia", "Menstruation", "Stress"),
-                                           choiceValues = c("422587007","409668002","313387002","45846002",       "276319003",        "73595000")),
+                                           choiceValues = c("162057007","409668002","313387002","45846002",       "276319003",        "73595000")),
                         
                         #checkboxInput(inputId = "asdfsad", label = "show migraine curve", value = FALSE),
                         
