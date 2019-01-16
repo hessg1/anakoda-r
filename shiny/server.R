@@ -17,7 +17,7 @@
   
 # import and prepare data
   # midata: load, extract, prepare
-    client <- setupMidata(forceLogin = FALSE)
+    client <- setupMidata(forceLogin = TRUE)
     conditions <- extractDataFinal(queryMidata(client))
     conditions <- prepareData(conditions)
 

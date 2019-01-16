@@ -56,6 +56,9 @@ plotBySCT <- function(userid, sct = NULL, conditions, colour = "steelblue3", dat
     user <- user[order(user$time),]
     
     plot(user$time, user$intensity, type=typ, lty= line, col=colour, ylab="intensity", xlab="day", lwd = size, ylim = c(0,10))
+    if(line == "blank"){
+      line <- "solid"
+    }
     legend(startdate, ypos , legend = description , col=colour, lty=line, cex=0.8, box.lty=0)
   }
 }
