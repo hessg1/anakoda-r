@@ -7,7 +7,8 @@ Within a "living case 2" project, we are working on connecting R directly to MID
 - clone the repository with `git clone https://github.com/hessg1/migrEnDV` in your systems console
 - if you have R and RStudio installed, you probably need to install the following packages
   - R on FHIR - type `install.packages("RonFHIR")` in your R console
-  - markdown - - type `install.packages("markdown")` in your R console
+  - R Shiny - type `install.packages("shiny")` in your R console
+  - markdown - type `install.packages("markdown")` in your R console
 - for starting the RShiny Webapp, just open either `shiny/server.R` or `shiny/ui.R` in RStudio and hit the "Run App" Button.
 - That's all. A window for loggin into midata should open, here you can log in as patient or as researcher.
   - for logging in with another user, change `client <- setupMidata(forceLogin = FALSE)` to `client <- setupMidata(forceLogin = TRUE)` in server.R
