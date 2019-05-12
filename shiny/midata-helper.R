@@ -32,6 +32,55 @@ prepareData <- function(dataset){
 }
 
 
+## This function extracts the load data from a dataframe when quering MedicationStatmentes
+##
+## Parameters:
+##  - input*: The result of a midata query, as returned from queryMidata()
+## 
+## Return value: 
+##  - a dataframe with one observation per row in following order:
+##    ID, Patient Identifier, Taking Time, Timestamp (of entry creation), medication name,
+##    taken quantity, and if it helped or not
+##
+## Author: hessg1@bfh.ch  Date: 2019-05-12
+##
+extractMedication <- function(input){
+  resources <- input$entry$resource
+  numberOfEntries <- dim(resources)[1]
+  datatable <- data.frame(ID=vector(), name=vector(), takingTime=vector(), timestamp=vector(), medication=vector(), quantity=vector(), helped=vector()) 
+  
+  for(i in 1:numberOfEntries){
+    # metadata
+    ID <- resources$id[i]
+    name <- resources$subject$display[i]
+    takingTime <- resources$effectiveDateTime[i]
+    timestamp <- resources$meta$lastUpdated[i] 
+    
+    # "load" data
+    medication <- resources$medicationCodeableConcept$coding[[i]]$display
+    if(is.null(medication)){
+      medication <- NA
+    }
+    quantity <- resources$dosage[[i]]$doseQuantity
+    if(is.null(quantity)){
+      quantity <- NA
+    } else {
+      quantity <- as.numeric(quantity)
+    }
+    
+    helped <-   resources$dosage[[i]]$text
+    if(is.null(helped)){
+      helped <- NA
+    }
+    datatable[i,] <- c(ID, name, takingTime, timestamp, medication, quantity, helped)
+  }
+  
+  datatable$name <- factor(datatable$name)
+  datatable$helped <- factor(datatable$helped)
+  
+  return(datatable)
+}
+
 ## This function extracts the following data from a dataframe as returned when querying 
 ## observations from midata with RonFHIR; and works with the old data set (from paper-
 ## based headache diary) as well as the version persisted by the heMigrania app.
@@ -46,10 +95,10 @@ prepareData <- function(dataset){
 ##
 ## Author: hessg1@bfh.ch  Date: 2019-01-14
 ##
-extractDataFinal <- function(input){
+extractObservation <- function(input){
   resources <- input$entry$resource
   numberOfObservations <- dim(resources)[1]
-  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector() ) 
+  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector(), wrongDate=vector()) 
   for(i in 1:numberOfObservations){
     
     # metadata
@@ -92,13 +141,18 @@ extractDataFinal <- function(input){
       }
     }
     
+    wrongDate <- startTime > endTime
 
     
-    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity)
+    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity,wrongDate)
     
   }
   
+  datatable$findingText <- factor(datatable$findingText)
+  datatable$bodysiteText <- factor(datatable$bodysiteText) 
   datatable$intensity <- as.numeric(datatable$intensity)
+  datatable$name <- factor(datatable$name)
+  datatable$wrongDate <- factor(datatable$wrongDate)
   
   #clear the console (disable this for debugging)
   cat("\014")
@@ -107,60 +161,7 @@ extractDataFinal <- function(input){
 }
 
 
-## This function extracts the following data from a dataframe as returned when querying 
-## observations from midata with RonFHIR
-##
-## Parameters:
-##  - input*: The result of a midata query, as returned from queryMidata()
-## 
-## Return value: 
-##  - a dataframe with one observation per row in following order:
-##    ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
-##    Finding (as plain text), Finding (as SCT), Intensity of the Finding
-##
-## Author: hessg1@bfh.ch  Date: 2018-12-07
-##
-extractData <- function(input){
-  resources <- input$entry$resource
-  numberOfObservations <- dim(resources)[1]
-  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector() ) 
-  for(i in 1:numberOfObservations){
-    
-    # metadata
-    ID <- resources$id[i]
-    name <- resources$subject$display[i]
-    startTime <- resources$effectivePeriod$start[i]
-    endTime <- resources$effectivePeriod$end[i]
-    timestamp <- resources$meta$lastUpdated[i] 
-    
-    # "load" data
-    bodysiteSCT <- resources$bodySite$coding[[i]]$code
-    bodysiteText <- resources$bodySite$coding[[i]]$display
-    # we have to handle the case when bodysite has no value
-    if(is.null(bodysiteSCT)){
-      bodysiteSCT <- NA
-    }
-    if(is.null(bodysiteText)){
-      bodysiteText <- NA
-    }
-    
-    findingText <- resources$valueCodeableConcept$coding[[i]]$display
-    findingSCT <- resources$valueCodeableConcept$coding[[i]]$code
-    findingIntensity <- resources$extension[[i]]$valueDecimal
-    if(is.null(findingIntensity)){
-      findingIntensity <- NA
-    }
-    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity)
-    
-  }
-  
-  datatable$intensity <- as.numeric(datatable$intensity)
-  
-  #clear the console (disable this for debugging)
-  cat("\014")
-  
-  return(datatable)
-}
+
 
 ## This function sets up a connection to MIDATA. OAuth authorization
 ## is required during the process.
@@ -185,9 +186,9 @@ setupMidata <- function(url = "http://test.midata.coop", forceLogin = TRUE){
   
   #Setting up the fhirClient
   client <- fhirClient$new(paste(url, "/fhir", sep=""))
-  client_id <- "migrEnTest"
-  client_secret <- "migrend"
-  app_name <- "migrEnTest"
+  client_id <- "anakoda-R" # was "migrEnTest"
+  client_secret <- "migren" # was "migrend"
+  app_name <- "anakoda-R" # was migrenTest
   scopes <- ""
   options(httr_oauth_cache=F)
   
