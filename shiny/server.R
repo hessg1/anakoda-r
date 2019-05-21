@@ -17,12 +17,13 @@
   
 # import and prepare data
   # midata: load, extract, prepare
-    client <- setupMidata(forceLogin = TRUE)
-    conditions <- extractDataFinal(queryMidata(client))
+    client <- setupMidata(url="https://ch.midata.coop", forceLogin = FALSE)
+    conditions <- extractObservation(queryMidata(client))
+    conditions <- extractObservation(res)
     conditions <- prepareData(conditions)
 
   # split off headache
-    headaches <- data.frame(day = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007"))$day, intensity = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007")  )$intensity, duration = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007")  )$duration, uid = subset(conditions, (conditions$findingSCT == "162308004" | conditions$findingSCT == "162307009" | conditions$findingSCT == "162309007"))$uid)
+    headaches <- data.frame(day = subset(conditions, (conditions$type == "headache"))$day, intensity = subset(conditions, (conditions$type == "headache"))$intensity, duration = subset(conditions, (conditions$type == "headache"))$duration, uid = subset(conditions, (conditions$type == "headache"))$uid)
     headaches <- colourize(headaches, c("darkolivegreen4", "orange", "red3"))
 
 # / import and prepare data

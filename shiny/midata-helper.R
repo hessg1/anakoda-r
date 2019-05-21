@@ -9,10 +9,13 @@
 ## Return value:
 ##   - the modified dataset, with added columns
 ##
-## Author: hessg1@bfh.ch  Date: 2018-12-09
+## Author: hessg1@bfh.ch  Date: 2018-05-21
 ##
 
 prepareData <- function(dataset){
+  # remove invalid observations
+  dataset <- dataset[which(dataset$wrongDate != TRUE),]
+  
   # factorize
   dataset$findingText <- factor(dataset$findingText)
   dataset$bodysiteText <- factor(dataset$bodysiteText) 
@@ -90,15 +93,15 @@ extractMedication <- function(input){
 ## 
 ## Return value: 
 ##  - a dataframe with one observation per row in following order:
-##    ID, Patient Name, StartTime, EndTime, Timestamp, Bodysite (as SCT), Bodysite (Plain text), 
-##    Finding (as plain text), Finding (as SCT), Intensity of the Finding
+##    TODO TODO TODO
 ##
-## Author: hessg1@bfh.ch  Date: 2019-01-14
+## Author: hessg1@bfh.ch  Date: 2019-05-20
 ##
 extractObservation <- function(input){
+
   resources <- input$entry$resource
   numberOfObservations <- dim(resources)[1]
-  datatable <- data.frame(ID=vector(), name=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector(), wrongDate=vector()) 
+  datatable <- data.frame(ID=vector(), name=vector(), type=vector(), startTime=vector(), endTime=vector(), timestamp=vector(), bodysiteSCT=vector(), bodysiteText=vector(), findingText=vector(), findingSCT=vector(), intensity=vector(), app=vector(), wrongDate=vector()) 
   for(i in 1:numberOfObservations){
     
     # metadata
@@ -107,6 +110,7 @@ extractObservation <- function(input){
     startTime <- resources$effectivePeriod$start[i]
     endTime <- resources$effectivePeriod$end[i]
     timestamp <- resources$meta$lastUpdated[i] 
+    app <- resources$meta$extension[[i]]$extension[[1]]$valueCoding$display[1]
     
     # "load" data
     bodysiteSCT <- resources$bodySite$coding[[i]]$code
@@ -114,7 +118,7 @@ extractObservation <- function(input){
     findingText <- resources$valueCodeableConcept$coding[[i]]$display
     findingSCT <- resources$valueCodeableConcept$coding[[i]]$code
     
-    # we the following values can also be NULL and must then be NA
+    # the following values can also be NULL and must then be NA
     if(is.null(bodysiteSCT)){
       bodysiteSCT <- NA
     }
@@ -122,29 +126,90 @@ extractObservation <- function(input){
       bodysiteText <- NA
     }
     if(is.null(findingSCT)){
-      findingSCT <- NA
+      if(resources$code$coding[[i]]$code == "162306000"){
+        findingSCT <- "74964007h"
+      }else {
+        findingSCT <- resources$component[[i]]$code$coding[[1]]$code # Schlaf
+      }
+      #if(is.null(findingSCT)){
+       # findingSCT <- NA
+      #}
     }
     if(is.null(findingText)){
-      findingText <- NA
+      if(resources$code$coding[[i]]$code == "162306000"){
+        findingText <- "other Headache"
+      }else{
+        findingText <- resources$component[[i]]$code$coding[[1]]$display # Schlaf
+      }
+      if(is.null(findingText)){
+        findingText <- NA
+      }
     }
-    
-    
     
     findingIntensity <- resources$extension[[i]]$valueDecimal #old way
     if(is.null(findingIntensity)){
       findingIntensity <- resources$component[[i]]$valueQuantity$value # try the new way
       if(is.null(findingIntensity)){
-        findingIntensity <- NA # when it's still NULL, it should be NA
-        #if(findingSCT == "276319003"| findingSCT == "73595000" | findingSCT == "309253009" | findingSCT == "102894008" | findingSCT == "106126000"){
-        #  findingIntensity <- 10 # non quantified values are 10 when present (and not persisted when absent)
-        #}
+        findingIntensity <- resources$component[[i]]$valueQuantity$value[1] # sleep 
+        if(is.null(findingIntensity)){
+          findingIntensity <- 15 # NA # when it's still NULL, it should be NA
+        }
       }
     }
     
-    wrongDate <- startTime > endTime
-
+ 
     
-    datatable[i,] <- c(ID, name, startTime, endTime, timestamp, bodysiteSCT, bodysiteText, findingText, findingSCT,findingIntensity,wrongDate)
+    
+    
+    type <- NA
+    headaches <- c("162307009", "162309007", "162308004", "74964007h")
+    complaints <- c("422400008","279079003", "16932000", "73905001", "29164008", "162307009", "162309007", "162308004", "313387002", "45846002", "248626009", "409668002", "409668002", "267093002", "267092007", "267101005", "267100006", "162057007")
+    conditions <- c("276319003", "73595000", "309253009", "102894008", "106126000")
+    dayentries <- c("225526009", "289141003", "702970004", "248254009")
+    
+    
+    if(findingSCT == "216299002"){
+      type <- "attack"
+    }
+    if(findingSCT %in% headaches){
+      type <- "headache"
+    }
+    if(findingSCT %in% complaints){
+      type <- "complaint"
+    }
+    if(findingSCT %in% conditions){
+      type <- "condition"
+    }
+    if(findingSCT %in% dayentries){
+      type <- "dayentry"
+    }
+    if(grepl("G43", findingSCT)){
+      type <- "diagnosis"
+    }
+    if(findingSCT == "74964007"){
+      type <- "variousOthers"
+    }
+    
+    if(is.na(startTime)){
+      day <- as.POSIXlt(resources$effectiveDateTime[i], format="%Y-%m-%dT%H:%M:%S")
+      day$hour <- 0
+      day$minute <- 0
+      day$second <- 0
+      startTime <- as.character.POSIXt(day, format="%Y-%m-%dT%H:%M:%S")
+      day$hour <- 23
+      day$minute <- 59
+      day$second <- 59
+      endTime <- as.character.POSIXt(day, format="%Y-%m-%dT%H:%M:%S")
+      
+    }
+    
+    wrongDate <- startTime[1] > endTime[1]
+    
+    entry <- c(ID[1], name[1], type, startTime[1], endTime[1], timestamp[1], bodysiteSCT[1], bodysiteText[1], findingText[1], findingSCT[1],findingIntensity[1],app[1], wrongDate[1])
+   #print(entry)
+   #print(length(entry))
+    
+    datatable[i,] <- entry
     
   }
   
@@ -152,10 +217,11 @@ extractObservation <- function(input){
   datatable$bodysiteText <- factor(datatable$bodysiteText) 
   datatable$intensity <- as.numeric(datatable$intensity)
   datatable$name <- factor(datatable$name)
-  datatable$wrongDate <- factor(datatable$wrongDate)
+  datatable$type <- factor(datatable$type)
+  datatable$app <- factor(datatable$app)
   
   #clear the console (disable this for debugging)
-  cat("\014")
+  #cat("\014")
   
   return(datatable)
 }
