@@ -56,7 +56,6 @@ hist(summary(observations$name), main="Wie viele Beiträge haben verschiedene Us
 headaches <- observations[ which(observations$type == 'headache'),]
 hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerzen haben die User bisher persistiert?", ylab="Anzahl Einträge", xlab="Anzahl User", breaks = 5, labels=TRUE, col="#0a967a")
 
-
 # und die einzelnen User:
 users <- split(observations, observations$name)
 
@@ -84,3 +83,6 @@ print(paste(nbrUsers, "Nutzer haben an mindestens", minNbrDays, "Tagen Daten ges
 par(mfrow=c(1,1))
 hist(usersNbrDays, main="Speicher-Disziplin einzelner User", sub="An wie vielen verschiedenen Tagen haben User gespeichert? (ohne MedicationStatement)", ylab= "Anzahl User", xlab="", breaks = 30, col="#0a967a")
 axis(side= 1, at=1:25)
+
+emptyHeadache <- headaches[which(is.na(headaches$bodysiteSCT)),]
+paste(nlevels(factor(emptyHeadache$name)), "User haben leere Kopfschmerzen persistiert", sep=" ")
