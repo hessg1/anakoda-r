@@ -30,8 +30,6 @@ rm(tester)
 summary(observations$wrongDate)
 observations <- prepareData(observations)
 
-
-
 # einige erste Auswertungen
 str(observations$name)
 summary(observations$name)
@@ -41,20 +39,30 @@ summary(factor(observations$app))
 plot(observations$type, col="#0a967a", sub="Welche Kategorien wurden am meisten gespeichert?", main="Arten von Einträgen", ylab="Anzahl Einträge")
 
 # wann wurde gespeichert?
-saveTime <- rbind(observations[,c("name", "timestamp")], medications[,c("name", "timestamp")])
-saveTime$timestamp <- as.POSIXct(saveTime$timestamp, format="%Y-%m-%dT%H:%M:%S")
-saveTime$hour <- as.numeric(format(saveTime$timestamp, format="%H"))
+medications$timestamp <- as.POSIXct(medications$timestamp, format="%Y-%m-%dT%H:%M:%S")
+
+saveTime <- rbind(observations[,c("ID", "name", "timestamp")], medications[,c("ID", "name", "timestamp")])
+saveTime$posix <- saveTime$timestamp
+saveTime$posix <- as.POSIXct(saveTime$posix, format="%Y-%m-%dT%H:%M:%S")
+saveTime$hour <- as.numeric(format(saveTime$posix, format="%H"))
 
 hist(saveTime$timestamp, breaks = 'days', main="Verlauf der Einträge", sub="Wie viele Einträge wurden pro Tag gemacht?", col="#0a967a", ylab = "Anzahl Einträge", freq = TRUE, xlab = "Datum")
 
-hist(saveTime$hour,  main="Uhrzeiten", sub="Zu welcher Tageszeit erfolgen die Einträge?", xlab = "Tageszeit", ylab = "Anzahl Einträge", breaks = 24, col="#0a967a", labels=TRUE)
-axis(side= 1, at=0:23)
+summary(factor(saveTime$hour))
 
-hist(summary(observations$name), main="Wie viele Beiträge haben verschiedene User?", xlab= "Anzahl Einträge", ylab="Anzahl User", breaks = 10, col="#0a967a")
+saveTime$hour <- saveTime$hour + 1 # alles um 1 nach rechts schieben
+# weil R die ersten beiden Werte aus einem seltsamen Grund im Histogramm zusammen nimmt, machen wir aus allen 1 eine 0 
+#(damit 0 und 1 (jetzt leer) zusammengefasst werden statt 1 und 2)
+saveTime$hour[saveTime$hour == 1] <- 0 
+
+hist(saveTime$hour, right=T, main="Uhrzeiten", sub="Zu welcher Tageszeit erfolgen die Einträge?", xlab = "Tageszeit", ylab = "Anzahl Einträge", breaks = 25, col="#0a967a", labels=TRUE)
+axis(side= 1, at=0:24)
+
+hist(summary(observations$name), main="Wie viele Einträge haben verschiedene User?", xlab= "Anzahl Einträge", ylab="Anzahl User", breaks = 10, col="#0a967a")
 
 # wir werfen einen Blick auf die Kopfschmerzen
 headaches <- observations[ which(observations$type == 'headache'),]
-hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerzen haben die User bisher persistiert?", ylab="Anzahl Einträge", xlab="Anzahl User", breaks = 5, labels=TRUE, col="#0a967a")
+hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerzen haben die User bisher persistiert?", xlab="Anzahl Einträge", ylab="Anzahl User", breaks = 5, labels=TRUE, col="#0a967a")
 
 # und die einzelnen User:
 users <- split(observations, observations$name)
@@ -82,7 +90,8 @@ for(i in 1:length(users)){
 print(paste(nbrUsers, "Nutzer haben an mindestens", minNbrDays, "Tagen Daten gespeichert", sep= " "))
 par(mfrow=c(1,1))
 hist(usersNbrDays, main="Speicher-Disziplin einzelner User", sub="An wie vielen verschiedenen Tagen haben User gespeichert? (ohne MedicationStatement)", ylab= "Anzahl User", xlab="", breaks = 30, col="#0a967a")
-axis(side= 1, at=1:25)
+axis(side= 1, at=1:30)
 
 emptyHeadache <- headaches[which(is.na(headaches$bodysiteSCT)),]
 paste(nlevels(factor(emptyHeadache$name)), "User haben leere Kopfschmerzen persistiert", sep=" ")
+
