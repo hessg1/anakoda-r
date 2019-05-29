@@ -1,22 +1,34 @@
+library (plyr)
+
 ## This function divides a set of observations into observations of a single day, 
 ## and indicates if it was a headache-day. Prepares the data for machine-learning (naive-bayes).
 ##
 ## Parameters: 
-##   - observations: TODO
+##   - observations: a list of observations, preferably for a single user
 ## 
 ## Return value:
-##   - TODO
+##   - a dataframe with the observations, with one-hot encoding for the conditions and complaints
+##     enriched by the information if the last and the following day was a headache day and if the sleep
+##     duration was above or below average (within a margin of 1 hour)
 ##
-## Author: hessg1@bfh.ch  Date: 2018-05-26
+## Author: hessg1@bfh.ch  Date: 2018-05-29
 ##
 splitIntoDays <- function(observations){
-  
-  
   alldays <- split(observations, observations$day)
-  obs <- alldays[[7]] 
-  test <- extractDays(entry)
-  test <- sapply(alldays, function(x){extractDays(x)}, simplify = FALSE, USE.NAMES = TRUE)
+  days <- sapply(alldays, function(x){extractDays(x)}, simplify = F, USE.NAMES = T)
+  days <- lapply(days, function(x){
+    append(x, list(
+      nextDayHeadache = otherDayHeadache(x$day, 1, days),
+      prevDayHeadache = otherDayHeadache(x$day, -1, days)
+    ))})
+  days <- ldply (days, data.frame)
+  sleepAvg <- mean(na.omit(days$sleepDur))
+  days['lessSleep'] <- (days$sleepDur - sleepAvg) < -0.5
+  days['moreSleep'] <- (days$sleepDur - sleepAvg) > 0.5
+  return((days[,-c(1)]))
 }
+
+
 ## extracts values for out a list of entries from a single day
 ##
 ## Parameters: 
@@ -30,7 +42,7 @@ splitIntoDays <- function(observations){
 ##
 extractDays <- function(obs){
   if(nlevels(factor(obs$day)) > 1) stop('not all entries from the same day')
-  day <- obs$day
+  day <- obs$day[1]
   
   # onehot-encoding for symptoms
   headacheDay <- 'headache'   %in% obs$type
@@ -76,5 +88,31 @@ extractDays <- function(obs){
               phonophobia=phonophobia, hyperosmia=hyperosmia, yawning=yawning, dysesthesia=dysesthesia, photophobia=photophobia,
               redEye=redEye, eyeDisc=eyeDisc, nasalDisc=nasalDisc, nasalObst=nasalObst, nausea=nausea, menstruation=menstruation,
               stress=stress, diffReading=diffReading, calm=calm, sleepInt=sleepInt, sleepDur=sleepDur, eating=eating))
+}
+
+## Checks if a related day is a headache day
+##
+## Parameters: 
+##   - day: the reference day (as as.Date())
+##   - diff: the difference of the day in question,
+##           e.g. +1 for the day after the reference day
+##           or -1 for the day before
+##   - list: a list of day lists as returned from extractDays
+## 
+## Return value:
+##   - TRUE if the day in question was a headache day
+##     FALSE if the day in question was not a headache day
+##
+## Author: hessg1@bfh.ch  Date: 2018-05-26
+##
+otherDayHeadache <- function(day, diff, daysList){
+  day <- as.Date(day)
+  posOtherDay <- lapply(daysList, function(x){x$day == day + diff}) # finds the list position of the day in question
+  otherDay <- daysList[which(posOtherDay == TRUE)] # gets the day from the list
+  if(length(otherDay) > 0) {
+    return (otherDay[[1]]$headache) # returns headache value of the day (TRUE / FALSE)
+  }else{
+    return (NA)
+  }
 }
 
