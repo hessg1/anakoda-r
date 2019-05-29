@@ -80,10 +80,10 @@ extractDays <- function(obs){
   # eatinghabits
   eatRegular    <- '289141003'  %in% obs$findingSCT
   eatIrregular <- '225526009'  %in% obs$findingSCT
-  eating <- 'unknown'
+  eating <- NA
   if(eatIrregular & !eatRegular) eating = 'irregular'
   if(eatRegular & !eatIrregular) eating = 'regular'
-
+  eating <- factor(eating)
   return(list(day=day, headache=headacheDay, attack=attack, vomitted=vomit, flickerLight=flicker, speachImp=speachImp,
               phonophobia=phonophobia, hyperosmia=hyperosmia, yawning=yawning, dysesthesia=dysesthesia, photophobia=photophobia,
               redEye=redEye, eyeDisc=eyeDisc, nasalDisc=nasalDisc, nasalObst=nasalObst, nausea=nausea, menstruation=menstruation,
@@ -115,4 +115,5 @@ otherDayHeadache <- function(day, diff, daysList){
     return (NA)
   }
 }
+
 
