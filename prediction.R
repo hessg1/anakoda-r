@@ -22,9 +22,10 @@ nb_byUser <- function(userList, threshold = 10, log = TRUE){
   nb_results <-  data.frame(matrix(ncol=13,nrow=0))
   # iterate through users
   for(user in userList){
+    user$nextDayHeadache <- factor(user$nextDayHeadache)
     # we skip users with to little data
-    if(dim(user)[1] > threshold & ('TRUE' %in% user$nextDayHeadache == TRUE)){
-      user$nextDayHeadache <- factor(user$nextDayHeadache)
+    if(dim(user)[1] >= threshold & nlevels(user$nextDayHeadache) > 1){
+
       user$prevDayHeadache <- factor(user$prevDayHeadache)
       levels(user$eating) <- c('irregular', 'regular', NA)
       
@@ -49,6 +50,8 @@ nb_byUser <- function(userList, threshold = 10, log = TRUE){
 ## Parameters: 
 ##   - trainUserSet: the list of users from which the model should be trained
 ##   - testUserSet: the list of users on which the model should be tested
+##   - threshold: the minimum number of days a user needs for prediction to be made (default: 10)
+##      users with less days are skipped
 ##   - log: determines if the results are printed on the console (default: TRUE)
 ## 
 ## Return value:
@@ -56,7 +59,7 @@ nb_byUser <- function(userList, threshold = 10, log = TRUE){
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-05-29
 ##
-nb_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
+nb_byCohort <- function(trainUserSet, testUserSet, threshold = 10, log = TRUE){
   # we have to shift the days from each user by a own factor, so we avoid overlapping 
   # (10 years space for each user should do the trick)
   for(i in 1:length(trainUserSet)){
@@ -79,10 +82,9 @@ nb_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
   
   # now lets apply the model to the users
   nb_overall_results <-  data.frame(matrix(ncol=13,nrow=0))
-  str(trainUserSet)
   for(user in testUserSet){
     user$nextDayHeadache <- factor(user$nextDayHeadache)
-    if(nlevels(user$nextDayHeadache) > 1){
+    if(dim(user)[1] >= threshold & nlevels(user$nextDayHeadache) > 1){
       user$prevDayHeadache <- factor(user$prevDayHeadache)
       levels(user$eating) <- c('irregular', 'regular', NA)
       
@@ -109,6 +111,8 @@ nb_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
 ## Parameters: 
 ##   - trainUserSet: the list of users from which the model should be trained
 ##   - testUserSet: the list of users on which the model should be tested
+##   - threshold: the minimum number of days a user needs for prediction to be made (default: 10)
+##      users with less days are skipped
 ##   - log: determines if the results are printed on the console (default: TRUE)
 ## 
 ## Return value:
@@ -116,7 +120,7 @@ nb_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
 ##
 ## Author: hessg1@bfh.ch  Date: 2018-05-30
 ##
-rf_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
+rf_byCohort <- function(trainUserSet, testUserSet, threshold = 10, log = TRUE){
   # we have to shift the days from each user by a own factor, so we avoid overlapping 
   # (10 years space for each user should do the trick)
   for(i in 1:length(trainUserSet)){
@@ -149,15 +153,17 @@ rf_byCohort <- function(trainUserSet, testUserSet, log = TRUE){
     levels(user$eating) <- levels(trainUserSet$eating)
     levels(user$nextDayHeadache) <- levels(trainUserSet$nextDayHeadache)
     levels(user$prevDayHeadache) <- levels(trainUserSet$prevDayHeadache)
-    if(dim(user)[1] > 5 & ('TRUE' %in% user$nextDayHeadache == TRUE)){
+    if(dim(user)[1] >= threshold & ('TRUE' %in% user$nextDayHeadache == TRUE)){
       
       predicted <- predict(rf_model, user[,2:ncol(user)]) 
       
       conf <- confusionMatrix(predicted, user$nextDayHeadache)
       if(log == TRUE){
+        print(predicted)
         print(as.logical(predicted))
         print(as.logical(user$nextDayHeadache))
         print(conf$overall)
+        print(conf$table)
       }
       if(!is.nan(conf$overall[2]) & conf$overall[2]<1){ # kappa as NaN or 1.0 is an artefact, we don't want this
         rf_overall_results <- rbind(rf_overall_results, c(conf$table,dim(user)[1],table(user$nextDayHeadache)['TRUE'], conf$overall))

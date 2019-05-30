@@ -48,7 +48,7 @@ byUser(observations)
   
   # also probieren wir mal ein Modell über alle user zu machen
   nb_overall_results <- nb_byCohort(users, usersByDay)
-    plot(nb_overall_results$kappa ~ nb_overall_results$nDays, col = rainbow(30)[10 * nb_overall_results$accuracy], pch=16, main="Naive Bayes (Modell über alle User)", xlab="Anzahl Tage", ylab="Kappa (in Farbe: Genauigkeit)", ylim=c(-0.5, 1), xlim=c(5,30))
+  plot(nb_overall_results$kappa ~ nb_overall_results$nDays, col = rainbow(30)[10 * nb_overall_results$accuracy], pch=16, main="Naive Bayes (Modell über alle User)", xlab="Anzahl Tage", ylab="Kappa (in Farbe: Genauigkeit)", ylim=c(-0.5, 1), xlim=c(5,30))
   abline(lm(nb_overall_results$kappa ~ nb_overall_results$nDays), col="grey")
 
   
