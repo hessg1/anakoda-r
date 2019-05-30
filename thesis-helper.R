@@ -84,6 +84,7 @@ extractDays <- function(obs){
   if(eatIrregular & !eatRegular) eating = 'irregular'
   if(eatRegular & !eatIrregular) eating = 'regular'
   eating <- factor(eating)
+  levels(eating) <- c('irregular', 'regular', NA)
   return(list(day=day, headache=headacheDay, attack=attack, vomitted=vomit, flickerLight=flicker, speachImp=speachImp,
               phonophobia=phonophobia, hyperosmia=hyperosmia, yawning=yawning, dysesthesia=dysesthesia, photophobia=photophobia,
               redEye=redEye, eyeDisc=eyeDisc, nasalDisc=nasalDisc, nasalObst=nasalObst, nausea=nausea, menstruation=menstruation,
