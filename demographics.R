@@ -38,6 +38,28 @@ byCohort <- function(observations, medications){
   # wir werfen einen Blick auf die Kopfschmerzen
   headaches <- observations[ which(observations$type == 'headache'),]
   hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerzen haben die User bisher persistiert?", xlab="Anzahl Einträge", ylab="Anzahl User", breaks = 5, labels=TRUE, col="#0a967a")
+  
+  par(mfrow=c(2,1))
+  headaches$posix <- as.POSIXct(headaches$startTime, format="%Y-%m-%dT%H:%M:%S")
+  headaches$hourStart <- as.numeric(format(headaches$posix, format="%H"))
+  headaches$hourStart <- headaches$hourStart + 1
+  headaches$hourStart[headaches$hourStart == 1] <- 0
+  hist(headaches$hourStart, right=T, main="Uhrzeiten", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Start)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  axis(side= 1, at=0:24)
+  
+  headaches$delay <- headaches$timestamp - headaches$startTime
+  
+  headaches$posix <- as.POSIXct(headaches$endTime, format="%Y-%m-%dT%H:%M:%S")
+  headaches$hourEnd <- as.numeric(format(headaches$posix, format="%H"))
+  headaches$hourEnd <- headaches$hourEnd + 1
+  headaches$hourEnd[headaches$hourEnd == 1] <- 0
+  hist(headaches$hourEnd, right=T, main="Uhrzeiten", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Ende)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  axis(side= 1, at=0:24)
+  par(mfrow=c(1,1))
+  plot((headaches$duration / 60) ~ headaches$hourStart, main="Kopfschmerzdauer zu Startzeit", ylab="Dauer (Minuten)", xlab="Tageszeit", pch=4, col = rainbow(30)[headaches$intensity])
+  axis(side= 1, at=0:24)
+  plot((headaches$duration / 60) ~ headaches$hourEnd, main="Kopfschmerzdauer zu Endzeit", ylab="Dauer (Minuten)", xlab="Tageszeit", pch=4, col = rainbow(30)[headaches$intensity])
+  axis(side= 1, at=0:24)
 }
 
 byUser <- function(observations){
