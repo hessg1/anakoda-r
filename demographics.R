@@ -124,4 +124,23 @@ descriptiveStat <- function(observations){
   headaches <- observations[observations$type == 'headache',]
   barchart(factor(headaches$findingText), col="#0a967a", main="Welche Kopfschmerzen treten am häufigsten auf?", xlab="Anzahl Nennungen (alle User)")
   barchart(factor(headaches$bodysiteText), col="#0a967a", main="Auf welcher Seite treten Kopfschmerzen am häufigsten auf?", xlab="Anzahl Nennungen (alle User)")
+
+  usersByDay <- lapply(split(observations, observations$name), function(x){splitIntoDays(x)}) # split dataset into users and days
+  
+  hdDays <- data.frame(matrix(ncol=3,nrow=length(usersByDay)))
+  names(hdDays) <- c("name", "headacheDays", "numberOfDays")
+  # iterate through users for detecting
+  for(i in 1:length(usersByDay)){
+    headache <- factor(usersByDay[[i]]$headache)
+    levels(headache) <- c(FALSE, TRUE)
+    headacheDays <- summary(headache)['TRUE']
+    numberDays <- length(usersByDay[[i]]$headache)
+    name <- names(usersByDay)[[i]]
+    hdDays[i,] <- c(name, headacheDays, numberDays)
+  }
+  hdDays <- hdDays[hdDays$headacheDays > 0,] # throw out the users without headaches
+  hdDays$percent <- apply(hdDays, 1, function(x){as.numeric(x[2]) / as.numeric(x[3])})
+  par(mfrow=c(1,2))
+  hist(as.numeric(hdDays$headacheDays), col="#0a967a", main="Verteilung der Kopfschmerz-Tage", xlab="Anzahl Kopfschmerztage", ylab="Anzahl User", breaks = 10)
+  hist(100*hdDays$percent, col="#0a967a", main="Verteilung der Kopfschmerz-Tage (relativ)", xlab="Anteil Kopfschmerztage (%)", ylab="Anzahl User", xlim=c(0,100))
 }
