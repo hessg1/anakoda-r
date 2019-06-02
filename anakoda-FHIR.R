@@ -31,8 +31,12 @@ print(paste( count(observations$app == 'anakoda')[2,2], "Einträge sind von anak
 
 # zeichne charts für Kohorte
 byCohort(observations, medications)
+descriptiveStat(observations)
+
 # und die einzelnen User:
 byUser(observations)
+
+
 
 # Machine-Learning / prediction:
   # etwas Datenaufbereitung
@@ -77,7 +81,7 @@ byUser(observations)
   abline(lm(nb_divided_results$kappa ~ nb_divided_results$nDays), col="grey")
   
   # zum Vergleich testen wir noch zwei dumme "Algorithmen"
-  alwaysNo_results <- alwaysNo_byCohort(usersByDay, threshold = 5, log = F)
+  alwaysNo_results <- alwaysNo_byCohort(usersByDay, threshold = 5, log = F) 
   plot(alwaysNo_results$kappa ~ alwaysNo_results$nDays, col = rainbow(30)[(10 * (alwaysNo_results$accuracy+0.1))], pch=16, main="Vorhersage: immer nein", xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,30))
   legend("topright", title="Genauigkeit", title.col="black", text.col = rainbow(30)[c(11,9,7,5,3,1)],lwd=0,legend=c("100%","80%","60%", "40%", "20%", "0%"), xjust=0.5, cex=0.7, bty="n")
   abline(lm(alwaysNo_results$kappa ~ alwaysNo_results$nDays), col="grey")

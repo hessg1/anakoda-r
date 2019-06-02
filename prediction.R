@@ -204,7 +204,7 @@ alwaysNo_byCohort <- function(testUserSet, threshold = 10, log = TRUE){
     }
   }
   names(results) <- c("FF", "FT", "TF", "TT", "nDays", "nTrue", "accuracy" , "kappa", "accu_lower", "accu_upper", "accu_null", "accuP", "Pmnemar")
-  return(aresults)
+  return(results)
 }
 
 
