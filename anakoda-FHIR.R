@@ -10,7 +10,7 @@ source('./prediction.R')
 client <- setupMidata("http://ch.midata.coop", TRUE)
 
 # make queries
-res <- client$search("Observation", "date=ge2019-04-19")
+res <- client$search("Observation", "status=preliminary")
 med <- client$search("MedicationStatement", "status=active")
 
 # extract data
