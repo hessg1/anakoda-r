@@ -157,9 +157,6 @@ extractObservation <- function(input){
       }
     }
     
- 
-    162309007
-    
     
     type <- NA
     headaches <- c("162307009", "162309007", "162308004", "74964007h")

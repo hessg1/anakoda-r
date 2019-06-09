@@ -38,7 +38,7 @@ byCohort <- function(observations, medications){
   
   # wir werfen einen Blick auf die Kopfschmerzen
   headaches <- observations[ which(observations$type == 'headache'),]
-  hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerzen haben die User bisher persistiert?", xlab="Anzahl Einträge", ylab="Anzahl User", breaks = 5, labels=TRUE, col="#0a967a")
+  hist(summary(headaches$name), main="Kopfschmerz-Einträge", sub="Wie viele Kopfschmerz-Einträge haben die User?", xlab="Anzahl Einträge", ylab="Anzahl User", xlim=c(0, 12), breaks = 12, labels=TRUE, col="#0a967a")
   
   par(mfrow=c(2,2))
   headaches$posix <- as.POSIXct(headaches$startTime, format="%Y-%m-%dT%H:%M:%S")
@@ -95,14 +95,14 @@ byUser <- function(observations){
     usersNbrDays[i] <- nbrDays
     if(nbrDays > minNbrDays){
       # Plot aufsetzen
-      par(mfrow=c(1,2))
+      par(mfrow=c(1,1))
       # Zeitverlauf plotten
       nbrUsers <- nbrUsers + 1
       saveTime <- users[[i]][,c("name", "timestamp")]
       saveTime$timestamp <- as.POSIXct(saveTime$timestamp, format="%Y-%m-%dT%H:%M:%S")
       saveTime$hour <- as.numeric(format(saveTime$timestamp, format="%H"))
       hist(saveTime$timestamp, breaks = 'days', main=paste("Einträge von", users[[i]]$name[1], sep = " "), sub="Wie viele Einträge wurden pro Tag gemacht?\n(ohne MedicationStatement)", col="#0a967a", ylab = "Anzahl Einträge", freq = TRUE, xlab = "")
-      
+ 
       # Arten von Einträgen plotten
       plot(users[[i]]$type, col="#0a967a", sub=paste("Welche Eintrag-Arten hat", users[[i]]$name[1], "gespeichert?", sep=" "), main="Arten von Einträgen", ylab="Anzahl Einträge")
     }
@@ -110,7 +110,7 @@ byUser <- function(observations){
   par(mfrow=c(1,1))
   print(paste(nbrUsers, "Nutzer haben an mindestens", minNbrDays, "Tagen Daten gespeichert", sep= " "))
   par(mfrow=c(1,1))
-  hist(usersNbrDays, main="Speicher-Disziplin einzelner User", sub="An wie vielen verschiedenen Tagen haben User gespeichert? (ohne MedicationStatement)", ylab= "Anzahl User", xlab="", breaks = 30, col="#0a967a")
+  hist(usersNbrDays, main="Eintrags-Disziplin einzelner User", sub="An wie vielen verschiedenen Tagen haben User Einträge erfasst? (ohne MedicationStatement)", ylab= "Anzahl User", xlab="Anzahl Tage mit Eintrag", breaks = 30, col="#0a967a")
   axis(side= 1, at=1:40)
   
  
@@ -140,7 +140,9 @@ descriptiveStat <- function(observations){
   }
   hdDays <- hdDays[hdDays$headacheDays > 0,] # throw out the users without headaches
   hdDays$percent <- apply(hdDays, 1, function(x){as.numeric(x[2]) / as.numeric(x[3])})
-  par(mfrow=c(1,2))
+  par(mfrow=c(1,1))
+  manyHdDays <- subset(hdDays, as.numeric(hdDays$headacheDays)>2)
+  print(manyHdDays$name)
   hist(as.numeric(hdDays$headacheDays), col="#0a967a", main="Verteilung der Kopfschmerz-Tage", xlab="Anzahl Kopfschmerztage", ylab="Anzahl User", breaks = 10)
   hist(100*hdDays$percent, col="#0a967a", main="Verteilung der Kopfschmerz-Tage (relativ)", xlab="Anteil Kopfschmerztage (%)", ylab="Anzahl User", xlim=c(0,100))
 }

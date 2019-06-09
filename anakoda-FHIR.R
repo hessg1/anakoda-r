@@ -20,6 +20,10 @@ medications <- extractMedication(med)
 observations <- removeTesters(observations)
 medications <- removeTesters(medications)
 
+# do the whole analysis only with entries from one app
+# observations <- subset(observations, observations$app == "anakoda")
+# medications <- subset(medications, medications$app == "anakoda")
+
 # wie viele Datensätze sind verkehrt?
 summary(observations$wrongDate)
 observations <- prepareData(observations)
@@ -28,12 +32,13 @@ observations <- prepareData(observations)
 print(paste( nlevels(observations$name), "Nutzer haben Observations persistiert", sep =" "))
 print(paste( nlevels(medications$name), "Nutzer haben MedicationStatements persistiert", sep =" "))
 print(paste( count(observations$app == 'anakoda')[2,2], "Einträge sind von anakoda,", count(observations$app == 'anakoda')[1,2], "von heMIgrania", sep=" "))
-
+pie(summary(observations$app))
 # zeichne charts für Kohorte
 byCohort(observations, medications)
 descriptiveStat(observations)
 
 # und die einzelnen User:
+source('./demographics.R')
 byUser(observations)
 
 
@@ -45,7 +50,7 @@ byUser(observations)
 
   # als erstes versuchen wir es mit einem modell pro user
   nb_results <- nb_byUser(usersByDay,  threshold = 10, log = F)
-  plot(nb_results$kappa ~ nb_results$nDays, main="Naive Bayes (Modell für jeden User einzeln)", col = rainbow(30)[(10 * (nb_results$accuracy+0.1))], pch=16, xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,30))  
+  plot(nb_results$kappa ~ nb_results$nDays, main="Naive Bayes (Modell für jeden User einzeln)", col = rainbow(30)[(10 * (nb_results$accuracy+0.1))], pch=16, xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,40))  
   legend("topright", title="Genauigkeit", title.col="black", text.col = rainbow(30)[c(11,9,7,5,3,1)],lwd=0,legend=c("100%","80%","60%", "40%", "20%", "0%"), xjust=0.5, cex=0.7, bty="n")
   abline(lm(nb_results$kappa ~ nb_results$nDays), col="grey")
   # wir sehen, mit einzelnen usern ist es noch nicht so gut (viel zu wenig Daten)
@@ -53,7 +58,7 @@ byUser(observations)
   
   # also probieren wir mal ein Modell über alle user zu machen
   nb_overall_results <- nb_byCohort(users, usersByDay, threshold = 7, log = F)
-  plot(nb_overall_results$kappa ~ nb_overall_results$nDays, col = rainbow(30)[(10 * (nb_overall_results$accuracy+0.1))], pch=16, main="Naive Bayes (Modell über alle User)", xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,30))
+  plot(nb_overall_results$kappa ~ nb_overall_results$nDays, col = rainbow(30)[(10 * (nb_overall_results$accuracy+0.1))], pch=16, main="Naive Bayes (Modell über alle User)", xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,40))
   legend("topright", title="Genauigkeit", title.col="black", text.col = rainbow(30)[c(11,9,7,5,3,1)],lwd=0,legend=c("100%","80%","60%", "40%", "20%", "0%"), xjust=0.5, cex=0.7, bty="n")
   abline(lm(nb_overall_results$kappa ~ nb_overall_results$nDays), col="grey")
 
