@@ -2,7 +2,7 @@
 source('./thesis-helper.R')
 
 removeTesters <- function(observations){
-  tester <- c("P-QSGN-AMCP", "P-MQ05-Q3HM", "P-G8OR-RDUB", "P-POBP-PROB", "P-MLHK-K1L5", "P-UUFN-JHBI", "P-REDP-9UUJ", "P-P5VV-4H3R", "P-HGVD-TODT", "P-VHD4-51A9")
+  tester <- c("P-LVPF-E0O1", "P-QSGN-AMCP", "P-MQ05-Q3HM", "P-G8OR-RDUB", "P-POBP-PROB", "P-MLHK-K1L5", "P-UUFN-JHBI", "P-REDP-9UUJ", "P-P5VV-4H3R", "P-HGVD-TODT", "P-VHD4-51A9")
   #tester_obs <- observations[ which(observations$name %in% tester), ]
   #tester_med <- medications[which(medications$name %in% tester),]
   observations <- observations[ which(!observations$name %in% tester), ]
@@ -31,7 +31,7 @@ byCohort <- function(observations, medications){
   #(damit 0 und 1 (jetzt leer) zusammengefasst werden statt 1 und 2)
   saveTime$hour[saveTime$hour == 1] <- 0 
   
-  hist(saveTime$hour, right=T, main="Uhrzeiten", sub="Zu welcher Tageszeit erfolgen die Einträge?", xlab = "Tageszeit", ylab = "Anzahl Einträge", breaks = 25, col="#0a967a", labels=TRUE)
+  hist(saveTime$hour, right=T, main="Uhrzeiten", sub="Zu welcher Tageszeit erfolgen die Einträge?", xlab = "Tageszeit", ylab = "Anzahl Einträge", breaks = 25, col="#0a967a", labels=F)
   axis(side= 1, at=0:24)
   
   hist(summary(observations$name), main="Wie viele Einträge haben verschiedene User?", xlab= "Anzahl Einträge", ylab="Anzahl User", breaks = 10, col="#0a967a")
@@ -47,7 +47,7 @@ byCohort <- function(observations, medications){
   headaches$hourStart <- as.numeric(format(headaches$posix, format="%H"))
   headaches$hourStart <- headaches$hourStart + 1
   headaches$hourStart[headaches$hourStart == 1] <- 0
-  hist(headaches$hourStart, right=T, main="Uhrzeiten",xlim=c(0,24),  sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Start)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  hist(headaches$hourStart, right=T, main="Uhrzeiten",xlim=c(0,24),  sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Start)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=F)
   axis(side= 1, at=0:24)
   
   headaches$delay <- headaches$timestamp - headaches$startTime
@@ -56,13 +56,13 @@ byCohort <- function(observations, medications){
   headaches$hourEnd <- as.numeric(format(headaches$posix, format="%H"))
   headaches$hourEnd <- headaches$hourEnd + 1
   headaches$hourEnd[headaches$hourEnd == 1] <- 0
-  hist(headaches$hourEnd, right=T, main="Uhrzeiten",xlim=c(0,24),  sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Ende)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  hist(headaches$hourEnd, right=T, main="Uhrzeiten",xlim=c(0,24),  sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Ende)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=F)
   axis(side= 1, at=0:24)
   
   headaches2 <- headaches[which(headaches$duration != 60*180),]
-  hist(headaches2$hourStart, right=T, xlim=c(0,24),  main="Uhrzeiten (ohne 'default' Kopfschmerzen)", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Start)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  hist(headaches2$hourStart, right=T, xlim=c(0,24),  main="Uhrzeiten", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Start)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=F)
   axis(side= 1, at=0:24)
-  hist(headaches2$hourEnd, right=T, xlim=c(0,24), main="Uhrzeiten (ohne 'default' Kopfschmerzen)", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Ende)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=TRUE)
+  hist(headaches2$hourEnd, right=T, xlim=c(0,24), main="Uhrzeiten (ohne 'default' Kopfschmerzen)", sub="Zu welcher Tageszeit hatten die User Kopfschmerzen? (Ende)", xlab = "Tageszeit", ylab = "Anzahl Kopfschmerzen", breaks = 25, col="#0a967a", labels=F)
   axis(side= 1, at=0:24)
   
   par(bg = '#606060')
@@ -73,13 +73,15 @@ byCohort <- function(observations, medications){
   plot((headaches$duration / 60) ~ headaches$hourEnd, main="Kopfschmerzdauer zu Endzeit", xlim=c(0,24), ylab="Dauer (Minuten)", xlab="Tageszeit", pch=4, col = rainbow(10, start=0, end=0.3)[11-headaches$intensity])
   #legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
   axis(side= 1, at=0:24)
+  par(mfrow=c(2,1))
+  plot((headaches2$duration / 60) ~ headaches2$hourStart, xlim=c(0,24),  main="Kopfschmerzdauer zu Startzeit", ylab="Dauer (Minuten)", xlab="", pch=16, col = rainbow(10, start=0, end=0.3)[11-headaches2$intensity])
+  #legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
+  axis(side= 1, at=0:24)
+  plot((headaches2$duration / 60) ~ headaches2$hourEnd, xlim=c(0,24), main="Kopfschmerzdauer zu Endzeit", ylab="Dauer (Minuten)", xlab="Tageszeit, Farbe für Intensität", pch=16, col = rainbow(10, start=0, end=0.3)[11-headaches2$intensity])
+  #legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
+  axis(side= 1, at=0:24)
+  legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
   
-  plot((headaches2$duration / 60) ~ headaches2$hourStart, xlim=c(0,24),  main="Kopfschmerzdauer zu Startzeit (ohne 'default')", ylab="Dauer (Minuten)", xlab="Tageszeit", pch=4, col = rainbow(10, start=0, end=0.3)[11-headaches2$intensity])
-  #legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
-  axis(side= 1, at=0:24)
-  plot((headaches2$duration / 60) ~ headaches2$hourEnd, xlim=c(0,24), main="Kopfschmerzdauer zu Endzeit (ohne 'default')", ylab="Dauer (Minuten)", xlab="Tageszeit", pch=4, col = rainbow(10, start=0, end=0.3)[11-headaches2$intensity])
-  #legend("topleft", title="Intensität", title.col="black", text.col = rainbow(10, start=0, end=0.3)[c(1,3,5,7,9,10)],lwd=0,legend=c("10","8","6", "4", "2", "1"), xjust=0.5, cex=0.7, bty="n")
-  axis(side= 1, at=0:24)
   
   par(mfrow=c(1,1), bg='white')
 }
