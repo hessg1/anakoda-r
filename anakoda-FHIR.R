@@ -10,11 +10,16 @@ source('./prediction.R')
 client <- setupMidata("http://ch.midata.coop", TRUE)
 
 # make queries
-res <- client$search("Observation", "status=preliminary")
+# TODO: clean split up in parts of months? -> midata only returns 1000 entries per query
+res <- client$search("Observation", c("date=le2019-05-12", "status=preliminary"))
+res2 <- client$search("Observation", c("date=ge2019-05-13", "status=preliminary"))
 med <- client$search("MedicationStatement", "status=active")
 
 # extract data
 observations <- extractObservation(res)
+obs2 <- extractObservation(res2)
+observations <- rbind(observations, obs2)
+rm(obs2, res, res2)
 medications <- extractMedication(med)
 
 observations <- removeTesters(observations)
@@ -28,6 +33,9 @@ medications <- removeTesters(medications)
 summary(observations$wrongDate)
 observations <- prepareData(observations)
 
+# wie viele Tageseinträge gibt es?
+print(paste( nlevels(factor(c(observations$timestamp, medications$timestamp)))[1], "unterschiedliche Tageseinträge gibt es", sep=" "))
+
 # einige erste Auswertungen
 print(paste( nlevels(observations$name), "Nutzer haben Observations persistiert", sep =" "))
 print(paste( nlevels(medications$name), "Nutzer haben MedicationStatements persistiert", sep =" "))
@@ -38,9 +46,7 @@ byCohort(observations, medications)
 descriptiveStat(observations)
 
 # und die einzelnen User:
-source('./demographics.R')
 byUser(observations)
-
 
 
 # Machine-Learning / prediction:
@@ -95,4 +101,5 @@ byUser(observations)
   plot(same_results$kappa ~ same_results$nDays, col = rainbow(30)[(10 * (same_results$accuracy+0.1))], pch=16, main="Vorhersage: wie am jetzigen Tag", xlab="Anzahl erfasste Tage", ylab="Kappa", ylim=c(-0.5, 1), xlim=c(5,30))
   legend("topright", title="Genauigkeit", title.col="black", text.col = rainbow(30)[c(11,9,7,5,3,1)],lwd=0,legend=c("100%","80%","60%", "40%", "20%", "0%"), xjust=0.5, cex=0.7, bty="n")
   abline(lm(same_results$kappa ~ same_results$nDays), col="grey")
+  
   
